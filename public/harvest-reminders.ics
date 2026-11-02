@@ -1,0 +1,62 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//beit-lehithavut//harvest//HE
+CALSCALE:GREGORIAN
+X-WR-CALNAME:בית להתהוות – קציר עונתי
+BEGIN:VEVENT
+UID:harvest-autumn@beit-lehithavut
+DTSTAMP:20261102T000000Z
+DTSTART;VALUE=DATE:20261221
+DTEND;VALUE=DATE:20261222
+RRULE:FREQ=YEARLY
+SUMMARY:קציר הסתיו – בית להתהוות
+DESCRIPTION:לאסוף מה צמח בכל מרחב חיים העונה: רעיונות שהתבהרו\, חיבורים\, שאלות פתוחות.
+BEGIN:VALARM
+TRIGGER:-P7D
+ACTION:DISPLAY
+DESCRIPTION:קציר הסתיו בעוד שבוע
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:harvest-winter@beit-lehithavut
+DTSTAMP:20261102T000000Z
+DTSTART;VALUE=DATE:20270320
+DTEND;VALUE=DATE:20270321
+RRULE:FREQ=YEARLY
+SUMMARY:קציר החורף – בית להתהוות
+DESCRIPTION:לאסוף מה צמח בכל מרחב חיים העונה: רעיונות שהתבהרו\, חיבורים\, שאלות פתוחות.
+BEGIN:VALARM
+TRIGGER:-P7D
+ACTION:DISPLAY
+DESCRIPTION:קציר החורף בעוד שבוע
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:harvest-spring@beit-lehithavut
+DTSTAMP:20261102T000000Z
+DTSTART;VALUE=DATE:20270621
+DTEND;VALUE=DATE:20270622
+RRULE:FREQ=YEARLY
+SUMMARY:קציר האביב – בית להתהוות
+DESCRIPTION:לאסוף מה צמח בכל מרחב חיים העונה: רעיונות שהתבהרו\, חיבורים\, שאלות פתוחות.
+BEGIN:VALARM
+TRIGGER:-P7D
+ACTION:DISPLAY
+DESCRIPTION:קציר האביב בעוד שבוע
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:harvest-summer@beit-lehithavut
+DTSTAMP:20261102T000000Z
+DTSTART;VALUE=DATE:20270922
+DTEND;VALUE=DATE:20270923
+RRULE:FREQ=YEARLY
+SUMMARY:קציר הקיץ – בית להתהוות
+DESCRIPTION:לאסוף מה צמח בכל מרחב חיים העונה: רעיונות שהתבהרו\, חיבורים\, שאלות פתוחות.
+BEGIN:VALARM
+TRIGGER:-P7D
+ACTION:DISPLAY
+DESCRIPTION:קציר הקיץ בעוד שבוע
+END:VALARM
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,116 @@
+rules_version = '2';
+
+// כללי האבטחה של "בית להתהוות".
+// קריאה פתוחה לכולם, כתיבה אחרי הרשמה. תוכן שנאצר (טקסטים, קטגוריות, קלפים, ספרייה) נערך רק בידי מארחים.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function profilePath() { return /databases/$(database)/documents/users/$(me()); }
+    function ownerPath() { return /databases/$(database)/documents/meta/owner; }
+
+    // המארח הראשי הוא מי שתבע את meta/owner ראשון (נעשה פעם אחת, מיד אחרי ההעלאה הראשונה).
+    function isSiteOwner() { return exists(ownerPath()) && get(ownerPath()).data.uid == me(); }
+    function hasRole(r) { return exists(profilePath()) && get(profilePath()).data.role == r; }
+    function isAdmin() { return signedIn() && (isSiteOwner() || hasRole('admin')); }
+    function isHost() { return isAdmin() || (signedIn() && hasRole('host')); }
+
+    function createsOwn() {
+      return signedIn()
+        && request.resource.data.uid == me()
+        && !request.resource.data.keys().hasAny(['hidden']);
+    }
+    function ownsDoc() { return signedIn() && resource.data.uid == me(); }
+    // בעלי תוכן יכולים לערוך אותו, אבל לא להחליף בעלות, לבטל הסתרה או לשנות סטטוס.
+    function ownerSafeUpdate() {
+      return ownsDoc()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid', 'hidden', 'status']);
+    }
+
+    match /meta/{docId} {
+      allow read: if true;
+      allow create: if docId == 'owner' && signedIn() && request.resource.data.uid == me();
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if signedIn() && userId == me() && request.resource.data.role == 'member';
+      allow update: if (signedIn() && userId == me() && request.resource.data.role == resource.data.role)
+                    || isAdmin();
+      allow delete: if isAdmin();
+
+      // תשובות פרטיות לקלפי דגדוד החלומות – רק לבעלים.
+      match /notes/{noteId} {
+        allow read, write: if signedIn() && userId == me();
+      }
+    }
+
+    // תוכן שנאצר בידי מארחים
+    match /content/{id}            { allow read: if true; allow write: if isHost(); }
+    match /compass/{id}            { allow read: if true; allow write: if isHost(); }
+    match /categories/{id}         { allow read: if true; allow write: if isHost(); }
+    match /cards/{id}              { allow read: if true; allow write: if isHost(); }
+    match /readings/{id}           { allow read: if true; allow write: if isHost(); }
+    match /harvests/{id}           { allow read: if true; allow write: if isHost(); }
+    match /settings/{id}           { allow read: if true; allow write: if isHost(); }
+    match /definitionVersions/{id} { allow read: if true; allow write: if isHost(); }
+    match /journal/{id}            { allow read: if true; allow write: if isAdmin(); }
+
+    // תוכן של משתתפים
+    match /dreams/{id} {
+      allow read: if true;
+      allow create: if createsOwn();
+      allow update: if ownerSafeUpdate() || isHost();
+      allow delete: if ownsDoc() || isHost();
+    }
+    match /ideas/{id} {
+      allow read: if true;
+      allow create: if createsOwn();
+      allow update: if ownerSafeUpdate() || isHost();
+      allow delete: if ownsDoc() || isHost();
+    }
+    match /pain/{id} {
+      allow read: if true;
+      allow create: if createsOwn();
+      allow update: if ownerSafeUpdate() || isHost();
+      allow delete: if ownsDoc() || isHost();
+    }
+    match /voices/{id} {
+      allow read: if true;
+      allow create: if createsOwn();
+      allow update: if ownerSafeUpdate() || isHost();
+      allow delete: if ownsDoc() || isHost();
+    }
+    match /comments/{id} {
+      allow read: if true;
+      allow create: if createsOwn();
+      allow update: if ownerSafeUpdate() || isHost();
+      allow delete: if ownsDoc() || isHost();
+    }
+    match /resonances/{id} {
+      allow read: if true;
+      allow create: if createsOwn();
+      allow delete: if ownsDoc() || isHost();
+    }
+    match /definitionProposals/{id} {
+      allow read: if true;
+      allow create: if createsOwn() && request.resource.data.status == 'open';
+      allow update: if ownerSafeUpdate() || isHost();
+      allow delete: if ownsDoc() || isHost();
+    }
+    match /studyCircles/{id} {
+      allow read: if true;
+      allow create: if createsOwn();
+      // כל משתתפ.ת רשומ.ה יכול.ה להצטרף או לעזוב – רק שדה החברים משתנה.
+      allow update: if ownerSafeUpdate() || isHost()
+                    || (signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']));
+      allow delete: if ownsDoc() || isHost();
+    }
+
+    match /reports/{id} {
+      allow create: if signedIn();
+      allow read, update, delete: if isHost();
+    }
+  }
+}
