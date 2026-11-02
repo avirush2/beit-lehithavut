@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useSettings } from '../lib/store.jsx';
-import { NextDoor } from '../components/Layout.jsx';
-import { Prose } from '../components/ui.jsx';
+import { Paths } from '../components/Layout.jsx';
+import { PageHead } from '../components/Botanical.jsx';
 
 const DECKS = [
   { key: 'inside', title: 'מבפנים', text: 'מהגוף, מהזיכרון, מהדמיון' },
@@ -14,6 +14,7 @@ export default function Tickle() {
   const { user, isHost, requireUser } = useAuth();
   const navigate = useNavigate();
   const intro = useContent('tickleIntro');
+  const deep = useContent('tickleDeep');
   const settings = useSettings();
   const cards = useCollection('cards') || [];
 
@@ -62,11 +63,7 @@ export default function Tickle() {
 
   return (
     <div className="page tickle">
-      <header className="page-head">
-        <p className="eyebrow">דלת ראשונה</p>
-        <h1>דגדוד חלומות</h1>
-        <Prose text={intro} className="lead" />
-      </header>
+      <PageHead spaceKey="tickle" lead={intro} deep={deep} deepLabel="ומה אם אין לי חלום?" />
 
       {settings.meditationUrl ? (
         <section className="card meditation">
@@ -115,7 +112,7 @@ export default function Tickle() {
         </section>
       ) : null}
 
-      <NextDoor to="/dreams" label="תמונת חלום רחבה" />
+      <Paths keys={['dreams', 'threshold', 'timing']} />
     </div>
   );
 }

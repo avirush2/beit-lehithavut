@@ -5,7 +5,8 @@ import { useAuth, useCollection, useContent, useDoc, byNewest, byOrder, visibleF
 import { DREAM_THEMES } from '../content/defaults.js';
 import Garden from '../components/Garden.jsx';
 import Comments from '../components/Comments.jsx';
-import { NextDoor } from '../components/Layout.jsx';
+import { Paths } from '../components/Layout.jsx';
+import { PageHead } from '../components/Botanical.jsx';
 import {
   Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Modal, Prose, useCompass,
 } from '../components/ui.jsx';
@@ -14,21 +15,19 @@ export function DreamsPage() {
   const { isHost, requireUser } = useAuth();
   const navigate = useNavigate();
   const intro = useContent('dreamsIntro');
+  const deep = useContent('dreamsDeep');
   const dreams = visibleFor(useCollection('dreams'), isHost)?.sort(byNewest);
   const resonances = useCollection('resonances');
   const [view, setView] = useState('garden');
 
   return (
     <div className="page">
-      <header className="page-head">
-        <p className="eyebrow">דלת שנייה</p>
-        <h1>תמונת חלום רחבה</h1>
-        <Prose text={intro} className="lead" />
+      <PageHead spaceKey="dreams" lead={intro} deep={deep}>
         <div className="row-start">
           <button type="button" className="btn" onClick={() => requireUser() && navigate('/dreams/new')}>לשתף חלום</button>
-          <Link to="/tickle" className="btn btn-ghost">אין לי חלום… (דגדוד חלומות)</Link>
+          <Link to="/tickle" className="btn btn-ghost">אין לי חלום… (דגדוג חלומות)</Link>
         </div>
-      </header>
+      </PageHead>
 
       {dreams == null ? <Loading /> : dreams.length === 0 ? (
         <Empty>הגן עוד ריק. החלום הראשון יהיה הזרע הראשון.</Empty>
@@ -52,7 +51,7 @@ export function DreamsPage() {
           )}
         </>
       )}
-      <NextDoor to="/categories" label="חלימה במרחבי חיים" text="ומשם – אל הפרטים" />
+      <Paths keys={['categories', 'tickle', 'journal']} />
     </div>
   );
 }

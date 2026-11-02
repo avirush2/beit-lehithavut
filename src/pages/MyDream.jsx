@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useDoc, useContent } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
-import { NextDoor } from '../components/Layout.jsx';
+import { Paths } from '../components/Layout.jsx';
+import { PageHead } from '../components/Botanical.jsx';
 import { Empty, Loading, Prose } from '../components/ui.jsx';
 
 const byDate = (a, b) => String(b.date || '').localeCompare(String(a.date || '')) || (b.createdAt || 0) - (a.createdAt || 0);
@@ -44,11 +45,7 @@ export function MyDreamList() {
 
   return (
     <div className="page">
-      <header className="page-head">
-        <p className="eyebrow">יומן חקר</p>
-        <h1>החלום שלי</h1>
-        <p className="lead">המרחב הזה הוא גם בית לחקר שלי. כאן אני כותב את החלום כפי שהוא מתהווה – ומזמין שיחה סביבו. — אבי</p>
-      </header>
+      <PageHead spaceKey="journal" lead="המרחב הזה הוא גם בית לחקר שלי. כאן אני כותב את החלום כפי שהוא מתהווה – ומזמין שיחה סביבו. — אבי" />
       {isAdmin ? (adding ? <EntryForm onDone={() => setAdding(false)} /> : <button type="button" className="btn" onClick={() => setAdding(true)}>רשומה חדשה</button>) : null}
       {entries == null ? <Loading /> : entries.length === 0 ? <Empty>היומן עוד ריק.</Empty> : (
         <ol className="journal-list">
@@ -67,7 +64,7 @@ export function MyDreamList() {
         <p className="eyebrow">השאלה הפתוחה</p>
         <p className="question">{openQuestion}</p>
       </section>
-      <NextDoor to="/dreams" label="תמונת חלום רחבה" text="ומה החלום שלך?" />
+      <Paths keys={['dreams', 'tickle']} text="ומה החלום שלך?" />
     </div>
   );
 }

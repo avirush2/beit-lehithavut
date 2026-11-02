@@ -6,6 +6,7 @@ import { backend, isDemo } from './lib/backend.js';
 import { seedMissing } from './lib/seed.js';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
+import Timing from './pages/Timing.jsx';
 import NewDefinition from './pages/NewDefinition.jsx';
 import { MyDreamEntry, MyDreamList } from './pages/MyDream.jsx';
 import { DreamForm, DreamView, DreamsPage } from './pages/Dreams.jsx';
@@ -24,6 +25,7 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="timing" element={<Timing />} />
             <Route path="new" element={<NewDefinition />} />
             <Route path="my-dream" element={<MyDreamList />} />
             <Route path="my-dream/:id" element={<MyDreamEntry />} />

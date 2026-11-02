@@ -5,29 +5,27 @@ import { useAuth, useCollection, useContent, useDoc, byNewest, byOrder, visibleF
 import { LENSES } from '../content/defaults.js';
 import { nextHarvest } from '../lib/seasons.js';
 import Comments from '../components/Comments.jsx';
-import { HarvestBanner, NextDoor } from '../components/Layout.jsx';
+import { HarvestBanner, Paths } from '../components/Layout.jsx';
+import { PageHead } from '../components/Botanical.jsx';
 import {
   Byline, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Prose, formatDate,
 } from '../components/ui.jsx';
 
 export function CategoriesPage() {
   const intro = useContent('categoriesIntro');
+  const deep = useContent('categoriesDeep');
   const categories = useCollection('categories')?.filter((c) => c.active).sort(byOrder);
   const ideas = useCollection('ideas') || [];
   const count = (id) => ideas.filter((i) => i.categoryId === id && !i.hidden).length;
 
   return (
     <div className="page">
-      <header className="page-head">
-        <p className="eyebrow">דלת שלישית</p>
-        <h1>חלימה במרחבי חיים</h1>
-        <p className="lead">{intro}</p>
-      </header>
+      <PageHead spaceKey="categories" lead={intro} deep={deep} />
       <HarvestBanner />
       {categories == null ? <Loading /> : categories.length === 0 ? <Empty>עוד אין מרחבי חיים. מארחים יכולים לטעון את תוכן הפתיחה.</Empty> : (
         <div className="cat-grid">
           {categories.map((c, i) => (
-            <Link key={c.id} to={`/categories/${c.id}`} className="cat-card" style={{ '--cat': `var(--c${(i % 6) + 1})` }}>
+            <Link key={c.id} to={`/categories/${c.id}`} className="cat-card" style={{ '--cat': `var(--c${(i % 8) + 1})` }}>
               <span className="cat-ring" aria-hidden="true">{c.name.replace(/[^֐-׿]/g, '').slice(0, 1)}</span>
               <h2>{c.name}</h2>
               <p>{c.description}</p>
@@ -36,7 +34,7 @@ export function CategoriesPage() {
           ))}
         </div>
       )}
-      <NextDoor to="/depth" label="עומק השינוי" text="ולצד העשייה – הלימוד" />
+      <Paths keys={['depth', 'dreams', 'threshold']} />
     </div>
   );
 }

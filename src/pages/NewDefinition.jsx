@@ -3,6 +3,7 @@ import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, byNewest, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
 import { Byline, Empty, ItemActions, Loading, Prose, formatDate } from '../components/ui.jsx';
+import { PageHead } from '../components/Botanical.jsx';
 
 const STATUS = { open: 'פתוחה לשיחה', accepted: 'התקבלה', declined: 'לא כעת' };
 
@@ -33,11 +34,7 @@ export default function NewDefinition() {
 
   return (
     <div className="page">
-      <header className="page-head">
-        <p className="eyebrow">המצפן</p>
-        <h1>מהו חדש?</h1>
-        <p className="lead">{intro}</p>
-      </header>
+      <PageHead spaceKey="new" lead={intro} />
 
       {versions == null ? <Loading /> : current ? (
         <section className="card definition-card">

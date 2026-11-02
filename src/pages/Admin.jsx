@@ -2,24 +2,33 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { backend, isDemo } from '../lib/backend.js';
 import { useAuth, useCollection, useDoc, byNewest, byOrder } from '../lib/store.jsx';
-import { seedMissing } from '../lib/seed.js';
+import { seedMissing, upgradeWording } from '../lib/seed.js';
 import { nextHarvest } from '../lib/seasons.js';
 import { DEFAULT_CONTENT, SPRINGS } from '../content/defaults.js';
 import { Empty, Loading, formatDate } from '../components/ui.jsx';
 
 const TEXTS = [
-  ['timingTitle', 'כותרת מסך העיתוי'],
-  ['timingBody', 'טקסט העיתוי והצורך'],
+  ['welcomeBody', 'שער הכניסה – טקסט הפתיחה'],
+  ['welcomeQuestion', 'שער הכניסה – השאלה מעל השבילים'],
+  ['openQuestion', 'שאלה שמלווה אותנו (בשער הכניסה)'],
+  ['timingTitle', 'העיתוי – כותרת'],
+  ['timingIntro', 'העיתוי – משפט פתיחה'],
+  ['timingQuestions', 'העיתוי – שאלות להתבוננות (שאלה בכל שורה)'],
+  ['timingBody', 'העיתוי – להעמיק (הכתיבה של אבי)'],
   ['voicesIntro', 'הזמנה ל"קולות מהתפר"'],
-  ['openQuestion', 'השאלה הפתוחה'],
-  ['newIntro', 'פתיח לדף "מהו חדש"'],
-  ['dreamsIntro', 'פתיח לחלום הרחב'],
-  ['categoriesIntro', 'פתיח למרחבי החיים'],
+  ['dreamsIntro', 'החלום הרחב – פתיח קצר'],
+  ['dreamsDeep', 'החלום הרחב – להעמיק'],
+  ['categoriesIntro', 'מרחבי חיים – פתיח קצר'],
+  ['categoriesDeep', 'מרחבי חיים – להעמיק'],
   ['harvestIntro', 'פתיח לקצירים'],
-  ['depthIntro', 'פתיח לעומק השינוי'],
+  ['depthIntro', 'מעמיקים ומשתנים – פתיח קצר'],
+  ['depthDeep', 'מעמיקים ומשתנים – להעמיק'],
   ['assumptions', 'נקודות הנחה'],
-  ['tickleIntro', 'פתיח לדגדוד חלומות'],
-  ['painIntro', 'פתיח ל"מהתפר"'],
+  ['tickleIntro', 'דגדוג חלומות – פתיח קצר'],
+  ['tickleDeep', 'דגדוג חלומות – "ומה אם אין לי חלום?"'],
+  ['painIntro', 'מהתפר – פתיח קצר'],
+  ['painDeep', 'מהתפר – להעמיק'],
+  ['newIntro', 'מהו חדש – פתיח'],
 ];
 
 function TextEditor({ k, label }) {
@@ -28,7 +37,7 @@ function TextEditor({ k, label }) {
   const [status, setStatus] = useState('');
   useEffect(() => { if (doc !== undefined) setValue(doc?.body ?? DEFAULT_CONTENT[k] ?? ''); }, [doc, k]);
   const save = async () => { await backend.set('content', k, { body: value }); setStatus('נשמר'); setTimeout(() => setStatus(''), 1800); };
-  const short = (DEFAULT_CONTENT[k] || '').length < 120;
+  const short = (DEFAULT_CONTENT[k] || '').length < 120 && !(DEFAULT_CONTENT[k] || '').includes('\n');
   return (
     <div className="card form">
       <span className="field-label">{label}</span>
@@ -144,7 +153,7 @@ function Settings() {
     <div className="card form">
       {f('musicUrl', 'קישור לקובץ מוזיקת רקע', 'קובץ mp3. הדרך הפשוטה: לשים את הקובץ בתיקייה public/audio ולכתוב כאן /audio/שם-הקובץ.mp3')}
       {f('musicTitle', 'שם היצירה (מופיע במעבר עכבר)')}
-      {f('meditationUrl', 'קישור לקובץ מדיטציה מונחית', 'מופיע בדף דגדוד החלומות. גם כאן: /audio/שם-הקובץ.mp3')}
+      {f('meditationUrl', 'קישור לקובץ מדיטציה מונחית', 'מופיע בדף דגדוג החלומות. גם כאן: /audio/שם-הקובץ.mp3')}
       {f('meditationTitle', 'כותרת המדיטציה')}
       <p className="hint">חשוב: רק מוזיקה שלך או ברישיון שימוש חופשי.</p>
       <div className="row-end">{status ? <span className="notice inline">{status}</span> : null}
@@ -158,6 +167,7 @@ function Start() {
   const categories = useCollection('categories')?.filter((c) => c.active).sort(byOrder) || [];
   const harvests = useCollection('harvests') || [];
   const [result, setResult] = useState(null);
+  const [upgraded, setUpgraded] = useState(null);
   const [busy, setBusy] = useState(false);
   const next = nextHarvest();
   const done = (catId) => harvests.some((h) => h.categoryId === catId && h.season === next?.label);
@@ -169,6 +179,12 @@ function Start() {
         <p className="muted">טוען את הטקסטים, ההגדרה, המצפן, מרחבי החיים, הקלפים, הספרייה והרשומה הראשונה ביומן. רק מה שעוד חסר נכתב – עריכות קיימות לא נדרסות.</p>
         <button type="button" className="btn" disabled={busy} onClick={async () => { setBusy(true); try { setResult(await seedMissing()); } finally { setBusy(false); } }}>טעינת תוכן הפתיחה</button>
         {result ? <p className="notice">{result.length ? `נטען: ${result.join(', ')}` : 'הכל כבר קיים.'}</p> : null}
+      </section>
+      <section className="card">
+        <h2>עדכון לנוסח החדש</h2>
+        <p className="muted">מעדכן את הטקסטים ואת מרחבי החיים לנוסח האחרון (קול משותף, פתיח קצר ושכבת "להעמיק"), ומוסיף טקסטים חדשים. טקסט שערכת בעצמך לא משתנה.</p>
+        <button type="button" className="btn" disabled={busy} onClick={async () => { setBusy(true); try { setUpgraded(await upgradeWording()); } finally { setBusy(false); } }}>עדכון לנוסח החדש</button>
+        {upgraded ? <p className="notice">{upgraded.length ? upgraded.join(' · ') : 'הכל כבר מעודכן.'}</p> : null}
       </section>
       <section className="card">
         <h2>הקציר הבא</h2>

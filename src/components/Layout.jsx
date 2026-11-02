@@ -3,18 +3,13 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { backend, isDemo } from '../lib/backend.js';
 import { useAuth, useSettings } from '../lib/store.jsx';
 import { harvestWindow } from '../lib/seasons.js';
-import { SITE } from '../content/defaults.js';
+import { SITE, SPACES, space } from '../content/defaults.js';
+import { Motif } from './Botanical.jsx';
 import SignIn from './SignIn.jsx';
 
 export const NAV = [
-  { to: '/', label: 'העיתוי', end: true },
-  { to: '/my-dream', label: 'החלום שלי' },
-  { to: '/dreams', label: 'חלום רחב' },
-  { to: '/categories', label: 'מרחבי חיים' },
-  { to: '/depth', label: 'עומק השינוי' },
-  { to: '/tickle', label: 'דגדוד חלומות' },
-  { to: '/threshold', label: 'מהתפר' },
-  { to: '/new', label: 'מהו חדש?' },
+  { to: '/', label: 'שער הכניסה', end: true },
+  ...SPACES.map((s) => ({ to: s.to, label: s.title })),
 ];
 
 export function Rings({ size = 34 }) {
@@ -59,7 +54,7 @@ export function HarvestBanner() {
     <div className="harvest-banner">
       <strong>{h.label}</strong>
       <span>{h.after ? ' – העונה התחלפה.' : h.days === 0 ? ' – היום.' : ` – בעוד ${h.days} ימים.`}</span>
-      <span> מה צמח במרחב העונה? </span>
+      <span> מה צמח אצלנו העונה? </span>
       <Link to="/categories">לקציר במרחבי החיים</Link>
     </div>
   );
@@ -124,12 +119,19 @@ export default function Layout() {
   );
 }
 
-// הזמנה עדינה לדלת הבאה במסע
-export function NextDoor({ to, label, text }) {
+// שבילים שיוצאים מכאן – הצעות, לא מסלול
+export function Paths({ keys, text = 'שבילים שיוצאים מכאן' }) {
   return (
-    <Link to={to} className="next-door">
-      <span className="muted small">{text || 'הדלת הבאה במסע'}</span>
-      <span className="next-door-label">{label} ←</span>
-    </Link>
+    <nav className="paths" aria-label={text}>
+      <p className="muted small">{text}</p>
+      <div className="paths-list">
+        {keys.map(space).filter(Boolean).map((s) => (
+          <Link key={s.key} to={s.to} className={`path-link tone-${s.tone}`}>
+            <Motif kind={s.motif} size={36} />
+            <span>{s.title}</span>
+          </Link>
+        ))}
+      </div>
+    </nav>
   );
 }

@@ -2,6 +2,38 @@ import { backend } from './backend.js';
 import {
   DEFAULT_CONTENT, DEFAULT_DEFINITION, DEFAULT_COMPASS, DEFAULT_CATEGORIES, DEFAULT_READINGS, DEFAULT_CARDS, DEFAULT_JOURNAL,
 } from '../content/defaults.js';
+import { PREVIOUS_CONTENT, PREVIOUS_CATEGORIES } from '../content/previous.js';
+
+// מעדכן לנוסח החדש רק טקסטים שלא נערכו ידנית (שעדיין זהים לנוסח קודם),
+// ומוסיף טקסטים חדשים שעוד חסרים.
+export async function upgradeWording() {
+  const written = [];
+  for (const [key, body] of Object.entries(DEFAULT_CONTENT)) {
+    const doc = await backend.get('content', key);
+    if (!doc) {
+      await backend.set('content', key, { body });
+      written.push(`חדש: ${key}`);
+    } else if (doc.body !== body && (PREVIOUS_CONTENT[key] || []).includes(doc.body)) {
+      await backend.set('content', key, { body });
+      written.push(`עודכן: ${key}`);
+    }
+  }
+  for (const cat of DEFAULT_CATEGORIES) {
+    const prev = PREVIOUS_CATEGORIES[cat.id];
+    if (!prev) continue;
+    const doc = await backend.get('categories', cat.id);
+    if (!doc) continue;
+    const patch = {};
+    for (const [field, oldValue] of Object.entries(prev)) {
+      if (doc[field] === oldValue) patch[field] = cat[field];
+    }
+    if (Object.keys(patch).length) {
+      await backend.update('categories', cat.id, patch);
+      written.push(`מרחב: ${cat.name}`);
+    }
+  }
+  return written;
+}
 
 // כותב את תוכן הפתיחה רק היכן שעוד אין תוכן – כדי לא לדרוס עריכות.
 export async function seedMissing() {

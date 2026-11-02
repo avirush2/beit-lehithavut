@@ -40,7 +40,7 @@ service cloud.firestore {
                     || isAdmin();
       allow delete: if isAdmin();
 
-      // תשובות פרטיות לקלפי דגדוד החלומות – רק לבעלים.
+      // תשובות פרטיות לקלפי דגדוג החלומות – רק לבעלים.
       match /notes/{noteId} {
         allow read, write: if signedIn() && userId == me();
       }

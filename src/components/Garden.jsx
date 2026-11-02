@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 // וחוטים מחברים חלומות שמישהו הרגיש שהם מהדהדים זה את זה.
 const W = 1000;
 const H = 620;
-const COLORS = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)'];
+const COLORS = ['var(--c3)', 'var(--c4)', 'var(--c2)', 'var(--c5)', 'var(--c6)', 'var(--c7)', 'var(--c1)', 'var(--c8)'];
 const NO_THEME = 'עוד בלי ערוגה';
 
 function hash(s) {

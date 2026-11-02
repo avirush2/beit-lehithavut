@@ -4,12 +4,15 @@ import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useDoc, byNewest, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
 import { Byline, Empty, ItemActions, Loading, Prose } from '../components/ui.jsx';
+import { PageHead } from '../components/Botanical.jsx';
+import { Paths } from '../components/Layout.jsx';
 
 const PROMPT = 'איזה צורך לא נענה כאן? איזה חלום מסתתר בכאב?';
 
 export function ThresholdPage() {
   const { isHost, requireUser, stamp } = useAuth();
   const intro = useContent('painIntro');
+  const deep = useContent('painDeep');
   const posts = visibleFor(useCollection('pain'), isHost)?.sort(byNewest);
   const [body, setBody] = useState('');
 
@@ -22,11 +25,7 @@ export function ThresholdPage() {
 
   return (
     <div className="page threshold">
-      <header className="page-head">
-        <p className="eyebrow">מקום לכאב</p>
-        <h1>מהתפר</h1>
-        <Prose text={intro} className="lead" />
-      </header>
+      <PageHead spaceKey="threshold" lead={intro} deep={deep} />
       <form className="card form" onSubmit={submit}>
         <textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder="מה כואב? מה מתסכל? מה כבר לא מחזיק?" />
         <div className="row-end"><button className="btn" disabled={!body.trim()}>לומר את זה</button></div>
@@ -39,6 +38,7 @@ export function ThresholdPage() {
           </Link>
         ))}
       </section>
+      <Paths keys={['timing', 'dreams', 'tickle']} />
     </div>
   );
 }

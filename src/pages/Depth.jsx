@@ -3,7 +3,8 @@ import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
 import { SPRINGS, STUDY_TOPICS } from '../content/defaults.js';
 import Comments from '../components/Comments.jsx';
-import { NextDoor } from '../components/Layout.jsx';
+import { Paths } from '../components/Layout.jsx';
+import { Motif, PageHead } from '../components/Botanical.jsx';
 import { Chips, Empty, ItemActions, Prose } from '../components/ui.jsx';
 
 const MODES = ['לבד', 'בצמד', 'בחבורה'];
@@ -85,31 +86,25 @@ function StudyCircles() {
 
 export default function Depth() {
   const intro = useContent('depthIntro');
+  const deep = useContent('depthDeep');
   const assumptions = useContent('assumptions');
   const readings = useCollection('readings')?.slice().sort(byOrder) || [];
 
   return (
     <div className="page">
-      <header className="page-head">
-        <p className="eyebrow">דלת רביעית</p>
-        <h1>עומק השינוי</h1>
-        <Prose text={intro} className="lead" />
-      </header>
-
-      <details className="card assumptions">
-        <summary>נקודות הנחה לפתח הלימוד</summary>
-        <Prose text={assumptions} />
-      </details>
+      <PageHead spaceKey="depth" lead={intro} deep={deep} />
 
       <section className="section">
         <h2>ארבעה מעיינות</h2>
         <div className="springs">
-          {SPRINGS.map((s) => {
+          {SPRINGS.map((s, i) => {
             const items = readings.filter((r) => r.spring === s.key);
             return (
-              <article key={s.key} className="card spring">
+              <article key={s.key} className={`card spring tone-${['sun', 'turquoise', 'sage', 'blossom'][i % 4]}`}>
+                <Motif kind="spring" size={44} />
                 <h3>{s.title}</h3>
-                <p className="muted">{s.text}</p>
+                <p className="spring-short">{s.short}</p>
+                <details className="deeper inline"><summary>להעמיק</summary><p className="muted">{s.text}</p></details>
                 {items.length ? (
                   <ul className="readings">
                     {items.map((r) => (
@@ -127,13 +122,18 @@ export default function Depth() {
         </div>
       </section>
 
+      <details className="card assumptions">
+        <summary>נקודות הנחה לפתח הלימוד</summary>
+        <Prose text={assumptions} />
+      </details>
+
       <StudyCircles />
 
       <section className="section">
         <h2>הצעות למקורות ושיחה על מהות השינוי</h2>
         <Comments targetType="depth" targetId="library" placeholder="ספר, מאמר, מקום, מסורת, ניסוי שכבר קיים – או מחשבה על השינוי שמתקיים עכשיו" />
       </section>
-      <NextDoor to="/tickle" label="דגדוד חלומות" text="ואם החלום עוד מחכה למילים" />
+      <Paths keys={['categories', 'tickle', 'new']} />
     </div>
   );
 }
