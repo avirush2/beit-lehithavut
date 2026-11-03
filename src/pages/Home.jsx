@@ -1,11 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth, useCollection, useContent, byNewest } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useInviteWays, useSpaces, useT, byNewest } from '../lib/store.jsx';
 import { HarvestBanner } from '../components/Layout.jsx';
 import { Motif } from '../components/Botanical.jsx';
 import GardenScene from '../components/GardenScene.jsx';
 import { openIdea } from '../components/IdeaButton.jsx';
 import { Prose } from '../components/ui.jsx';
-import { SITE, SPACES } from '../content/defaults.js';
+import { SITE } from '../content/defaults.js';
 
 // גדלים שונים לדלתות – כדי שהשער ירגיש כמו גן ולא כמו טבלה
 const DOOR_SIZE = { dreams: 'big', celebrate: 'wide' };
@@ -42,21 +42,21 @@ function Invite() {
   const { requireUser } = useAuth();
   const navigate = useNavigate();
   const body = useContent('inviteBody');
-  const ways = [
-    { label: 'לשתף חלום או רעיון', tone: 'blossom', go: () => requireUser() && navigate('/dreams/new') },
-    { label: 'להעלות שאלה לחקירה משותפת', tone: 'sky', go: () => navigate('/categories?share=question') },
-    { label: 'לשתף התנסות או יוזמה', tone: 'sage', go: () => navigate('/categories?share=experiment') },
-    { label: 'להציע מפגש, ידע או תוכן', tone: 'sun', go: () => openIdea('partner', 'איזה מפגש, ידע או תוכן היינו רוצים להביא למרחב?') },
-    { label: 'להציע חיבור לאדם או לארגון', tone: 'lilac', go: () => openIdea('partner', 'למי כדאי שנתחבר, ומה החיבור יכול להצמיח?') },
-  ];
+  const t = useT();
+  const go = {
+    dream: () => requireUser() && navigate('/dreams/new'),
+    question: () => navigate('/categories?share=question'),
+    experiment: () => navigate('/categories?share=experiment'),
+  };
+  const ways = useInviteWays().map((w) => ({ ...w, go: go[w.key] || (() => openIdea('partner', w.prompt)) }));
   return (
     <section className="band band-festive">
       <div className="band-inner">
-        <p className="hand">להביא משהו מעצמנו</p>
+        <p className="hand">{t('gate-invite')}</p>
         <p className="invite-text">{body}</p>
         <div className="ways">
           {ways.map((w) => (
-            <button key={w.label} type="button" className={`way tone-${w.tone}`} onClick={w.go}>{w.label}</button>
+            <button key={w.key} type="button" className={`way tone-${w.tone}`} onClick={w.go}>{w.label}</button>
           ))}
         </div>
       </div>
@@ -69,6 +69,8 @@ export default function Home() {
   const welcomeQuestion = useContent('welcomeQuestion');
   const sparks = useContent('sparksBody');
   const openQuestion = useContent('openQuestion');
+  const spaces = useSpaces();
+  const t = useT();
   const versions = useCollection('definitionVersions');
   const current = versions?.slice().sort(byNewest)[0];
 
@@ -76,7 +78,7 @@ export default function Home() {
     <div className="home">
       <section className="gate">
         <div className="gate-inner">
-          <p className="hand">ברוכות וברוכים הבאים 🌿</p>
+          <p className="hand">{t('gate-hello')}</p>
           <h1>{SITE.name}</h1>
           <p className="gate-tag">{SITE.tagline}</p>
           <Prose text={welcome} className="gate-text" />
@@ -86,7 +88,7 @@ export default function Home() {
 
       <section className="band band-sparks">
         <div className="band-inner">
-          <p className="hand">ניצוצות</p>
+          <p className="hand">{t('gate-sparks')}</p>
           <Prose text={sparks} className="sparks-text" />
         </div>
       </section>
@@ -96,7 +98,7 @@ export default function Home() {
       <section className="section paths-home">
         <h2 className="center scribble">{welcomeQuestion}</h2>
         <div className="doors">
-          {SPACES.map((s) => (
+          {spaces.map((s) => (
             <Link key={s.key} to={s.to} className={`door tone-${s.tone} ${DOOR_SIZE[s.key] || ''}`}>
               <Motif kind={s.motif} size={DOOR_SIZE[s.key] === 'big' ? 110 : 56} />
               <h3>{s.title}</h3>
@@ -115,13 +117,13 @@ export default function Home() {
           <div className="band-inner">
             <p className="eyebrow">מהו חדש?</p>
             <blockquote className="definition">{current.text}</blockquote>
-            <Link to="/compass#new">ההגדרה פתוחה לשיחה ולשינוי ←</Link>
+            <Link to="/compass#new">{t('gate-definition')}</Link>
           </div>
         </section>
       ) : null}
 
       <section className="section open-question">
-        <p className="hand">שאלה שמלווה אותנו</p>
+        <p className="hand">{t('gate-open')}</p>
         <p className="question">{openQuestion}</p>
       </section>
     </div>

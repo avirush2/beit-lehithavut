@@ -1,9 +1,9 @@
 import { Component, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { backend, isDemo } from '../lib/backend.js';
-import { useAuth, useCollection, useSettings } from '../lib/store.jsx';
+import { useAuth, useCollection, useSettings, useSpaces, useT } from '../lib/store.jsx';
 import { harvestWindow } from '../lib/seasons.js';
-import { SITE, SPACES, space } from '../content/defaults.js';
+import { SITE } from '../content/defaults.js';
 import { Motif } from './Botanical.jsx';
 import SignIn from './SignIn.jsx';
 import IdeaButton, { openIdea } from './IdeaButton.jsx';
@@ -14,10 +14,6 @@ function NewFeedbackCount() {
   return fresh?.length ? <span className="count-badge" title="פניות חדשות ב'יש לנו רעיון'">{fresh.length}</span> : null;
 }
 
-export const NAV = [
-  { to: '/', label: 'שער הכניסה', end: true },
-  ...SPACES.map((s) => ({ to: s.to, label: s.title })),
-];
 
 export function Rings({ size = 34 }) {
   // סמל טבעות העץ: עצמי ← משפחה ← קהילה ← אדמה
@@ -82,6 +78,9 @@ class PageBoundary extends Component {
 export default function Layout() {
   const { user, name, isAdmin, isHost, openSignIn } = useAuth();
   const { pathname } = useLocation();
+  const spaces = useSpaces();
+  const t = useT();
+  const nav = [{ to: '/', label: 'שער הכניסה', end: true }, ...spaces.map((s) => ({ to: s.to, label: s.title }))];
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
 
   return (
@@ -108,7 +107,7 @@ export default function Layout() {
         </div>
       </header>
       <nav className="site-nav" aria-label="ניווט ראשי">
-        {NAV.map((n) => (
+        {nav.map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => (isActive ? 'active' : '')}>{n.label}</NavLink>
         ))}
       </nav>
@@ -118,9 +117,9 @@ export default function Layout() {
       <footer className="site-footer">
         <Rings size={26} />
         <p>{SITE.name} · {SITE.tagline}</p>
-        <p className="muted small">הדרך תמשיך להיות חכמה מאיתנו.</p>
+        <p className="muted small">{t('footer-line')}</p>
         <p className="footer-share">
-          הבית הזה נבנה יחד · <button type="button" className="link-btn" onClick={() => openIdea()}>משתפים ומשפיעים 🌱</button>
+          הבית הזה נבנה יחד · <button type="button" className="link-btn" onClick={() => openIdea()}>{t('footer-share')}</button>
         </p>
       </footer>
       <IdeaButton />
@@ -132,11 +131,12 @@ export default function Layout() {
 
 // שבילים שיוצאים מכאן – הצעות, לא מסלול
 export function Paths({ keys, text = 'שבילים שיוצאים מכאן' }) {
+  const spaces = useSpaces();
   return (
     <nav className="paths" aria-label={text}>
       <p className="muted small">{text}</p>
       <div className="paths-list">
-        {keys.map(space).filter(Boolean).map((s) => (
+        {keys.map((k) => spaces.find((s) => s.key === k)).filter(Boolean).map((s) => (
           <Link key={s.key} to={s.to} className={`path-link tone-${s.tone}`}>
             <Motif kind={s.motif} size={36} />
             <span>{s.title}</span>

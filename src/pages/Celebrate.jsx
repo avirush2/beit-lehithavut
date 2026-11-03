@@ -1,26 +1,21 @@
 import { useState } from 'react';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useSettings, byNewest, visibleFor } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useSettings, useStoryKinds, useT, byNewest, visibleFor } from '../lib/store.jsx';
+
+function usePrompts() {
+  const t = useT();
+  return t('celebrate-prompts').split('\n').map((p) => p.trim()).filter(Boolean);
+}
 import Comments from '../components/Comments.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { PageHead } from '../components/Botanical.jsx';
 import { Byline, Empty, ItemActions, Loading, Prose } from '../components/ui.jsx';
 
 // חגיגה והשראה מההווה: המבט אל מה שכבר צומח. לא גלריה שמוצגת מלמעלה – מקום שכולם מוסיפים אליו.
-const KINDS = [
-  { key: 'outside', title: 'פוגשים בחוץ', text: 'אנשים, יוזמות, קהילות, פרויקטים והתנסויות שאנחנו פוגשים בעולם.' },
-  { key: 'ours', title: 'מתהווה אצלנו', text: 'דברים שאנחנו עצמנו יוצרים, מנסים ומפתחים.' },
-  { key: 'moments', title: 'רגעים של שייכות', text: 'רגעים קטנים, מפגשים, תובנות וחוויות שמזכירים לנו אילו חיים אפשריים.' },
-];
-const PROMPTS = [
-  'מה מעורר בנו השראה?',
-  'איפה אנחנו פוגשים משהו חדש שכבר צומח?',
-  'איזו יוזמה או התנסות מחזירה לנו אמון?',
-  'איזה רגע קטן גרם לנו להרגיש חלק ממשהו טוב?',
-];
-
 function StoryForm({ initialKind, onDone }) {
   const { requireUser, stamp } = useAuth();
+  const KINDS = useStoryKinds();
+  const PROMPTS = usePrompts();
   const [kind, setKind] = useState(initialKind || 'outside');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -54,13 +49,14 @@ function StoryForm({ initialKind, onDone }) {
 function GideiBayit() {
   const text = useContent('gideiBayit');
   const settings = useSettings();
+  const t = useT();
   if (!text) return null;
   return (
     <article className="card guest-card">
-      <p className="eyebrow">עולם שכן · בזיקה, לא בכפיפות</p>
+      <p className="eyebrow">{t('gidulei-eyebrow')}</p>
       <h3>גידולי בית</h3>
       <Prose text={text} />
-      {settings.gideiBayitUrl ? <a href={settings.gideiBayitUrl} target="_blank" rel="noreferrer">לבקר בגידולי בית ←</a> : null}
+      {settings.gideiBayitUrl ? <a href={settings.gideiBayitUrl} target="_blank" rel="noreferrer">{t('gidulei-link')}</a> : null}
     </article>
   );
 }
@@ -69,6 +65,9 @@ export default function Celebrate() {
   const { isHost, requireUser } = useAuth();
   const intro = useContent('celebrateIntro');
   const deep = useContent('celebrateDeep');
+  const KINDS = useStoryKinds();
+  const PROMPTS = usePrompts();
+  const t = useT();
   const stories = visibleFor(useCollection('stories'), isHost)?.sort(byNewest);
   const [tab, setTab] = useState('outside');
   const [adding, setAdding] = useState(false);
@@ -90,7 +89,7 @@ export default function Celebrate() {
       <p className="layer-question">{current.text}</p>
 
       {adding ? <StoryForm initialKind={tab} onDone={() => setAdding(false)} /> : (
-        <button type="button" className="btn" onClick={() => requireUser() && setAdding(true)}>לשתף משהו שצומח</button>
+        <button type="button" className="btn" onClick={() => requireUser() && setAdding(true)}>{t('celebrate-share')}</button>
       )}
 
       <section className="section">

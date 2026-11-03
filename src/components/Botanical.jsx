@@ -1,4 +1,4 @@
-import { space } from '../content/defaults.js';
+import { useSpaces } from '../lib/store.jsx';
 import { Prose } from './ui.jsx';
 
 // איורים בוטניים קטנים, בקו יד: קו בצבע הגוון של המרחב, ומילוי בכתם צבעי מים עדין.
@@ -112,7 +112,7 @@ export function Deeper({ text, label = 'להעמיק', children }) {
 
 // ראש מרחב: דימוי, כותרת ומשפט אחד. את השאר – בשכבת ההעמקה.
 export function PageHead({ spaceKey, eyebrow, title, lead, deep, deepLabel, children }) {
-  const s = space(spaceKey) || {};
+  const s = useSpaces().find((x) => x.key === spaceKey) || {};
   return (
     <header className={`page-head space-head tone-${s.tone || 'sage'}`}>
       <Motif kind={s.motif} size={72} className="head-motif" />

@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth } from '../lib/store.jsx';
+import { useAuth, useFeedbackTypes, useT } from '../lib/store.jsx';
 import { Modal } from './ui.jsx';
 
 // "יש לנו רעיון 🌱" – משוב, רעיונות ושותפות בפיתוח המרחב עצמו.
 // פתוח לכולם, גם בלי הרשמה. הפניות נקראות רק בידי מארחים (ראו firestore.rules).
-export const FEEDBACK_TYPES = [
-  { key: 'feedback', label: 'משוב על האתר', hint: 'מה עובד? מה לא ברור? מה אפשר לשפר?' },
-  { key: 'idea', label: 'רעיון חדש', hint: 'מה חסר כאן? מה הייתם רוצים להוסיף?' },
-  { key: 'partner', label: 'שותפות בפיתוח', hint: 'רוצים לקחת חלק ביצירה, בתחזוקה, בתוכן, במפגשים או בחיבורים?' },
-];
 
 // פתיחה מכל מקום באתר: openIdea('partner', 'טקסט פתיחה אופציונלי')
 export function openIdea(type = 'feedback', prompt = '') {
@@ -20,6 +15,8 @@ export function openIdea(type = 'feedback', prompt = '') {
 export default function IdeaButton() {
   const { user, name: myName } = useAuth();
   const { pathname } = useLocation();
+  const FEEDBACK_TYPES = useFeedbackTypes();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('feedback');
   const [prompt, setPrompt] = useState('');
@@ -72,13 +69,13 @@ export default function IdeaButton() {
   return (
     <>
       <button type="button" className="idea-fab" onClick={() => openIdea()}>
-        יש לנו רעיון <span aria-hidden="true">🌱</span>
+        {t('idea-button')}
       </button>
-      <Modal open={open} onClose={close} title="יש לנו רעיון 🌱">
+      <Modal open={open} onClose={close} title={t('idea-button')}>
         {state === 'sent' ? (
           <div className="idea-thanks">
-            <p className="idea-thanks-title">תודה! משהו קטן נזרע.</p>
-            <p className="muted">כל פנייה נקראת. הבית הזה אינו מוצר מוגמר – הוא מתהווה גם דרך מה שאנחנו מביאים אליו.</p>
+            <p className="idea-thanks-title">{t('idea-thanks')}</p>
+            <p className="muted">{t('idea-thanks-text')}</p>
             <div className="row-end">
               <button type="button" className="btn btn-ghost" onClick={() => setState('idle')}>לשלוח עוד משהו</button>
               <button type="button" className="btn" onClick={close}>סגירה</button>
@@ -86,7 +83,7 @@ export default function IdeaButton() {
           </div>
         ) : (
           <form onSubmit={send} className="idea-form">
-            <p className="muted small">הבית הזה נבנה יחד. אפשר לכתוב בלי להירשם.</p>
+            <p className="muted small">{t('idea-intro')}</p>
             <div className="chips" role="radiogroup" aria-label="סוג הפנייה">
               {FEEDBACK_TYPES.map((t) => (
                 <button key={t.key} type="button" role="radio" aria-checked={type === t.key} className={`chip ${type === t.key ? 'on' : ''}`} onClick={() => setType(t.key)}>{t.label}</button>

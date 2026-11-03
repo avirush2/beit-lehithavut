@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDoc, byNewest, visibleFor } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useDoc, useT, byNewest, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
 import { Byline, Empty, ItemActions, Loading, Prose } from '../components/ui.jsx';
 import { PageHead } from '../components/Botanical.jsx';
 import { Paths } from '../components/Layout.jsx';
 
-const PROMPT = 'איזה צורך לא נענה כאן? איזה חלום מסתתר בכאב?';
-
 export function ThresholdPage() {
   const { isHost, requireUser, stamp } = useAuth();
   const intro = useContent('painIntro');
   const deep = useContent('painDeep');
+  const t = useT();
   const posts = visibleFor(useCollection('pain'), isHost)?.sort(byNewest);
   const [body, setBody] = useState('');
 
@@ -27,8 +26,8 @@ export function ThresholdPage() {
     <div className="page threshold">
       <PageHead spaceKey="threshold" lead={intro} deep={deep} />
       <form className="card form" onSubmit={submit}>
-        <textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder="מה כואב? מה מתסכל? מה כבר לא מחזיק?" />
-        <div className="row-end"><button className="btn" disabled={!body.trim()}>לומר את זה</button></div>
+        <textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder={t('pain-placeholder')} />
+        <div className="row-end"><button className="btn" disabled={!body.trim()}>{t('pain-send')}</button></div>
       </form>
       <section className="section">
         {posts == null ? <Loading /> : posts.length === 0 ? <Empty>שקט כאן כרגע.</Empty> : posts.map((p) => (
@@ -48,6 +47,8 @@ export function ThresholdPost() {
   const navigate = useNavigate();
   const { user, isHost, requireUser } = useAuth();
   const post = useDoc('pain', id);
+  const t = useT();
+  const PROMPT = t('pain-prompt');
   if (post === undefined) return <div className="page"><Loading /></div>;
   if (post === null || (post.hidden && !isHost && post.uid !== user?.uid)) {
     return <div className="page"><Empty>לא נמצא. <Link to="/threshold">חזרה</Link></Empty></div>;

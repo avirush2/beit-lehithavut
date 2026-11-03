@@ -17,7 +17,6 @@ export const SPACES = [
   { key: 'compass', to: '/compass', title: 'המצפן', line: 'שבעה עקרונות שמכוונים את החקירה, והגדרה חיה של "מהו חדש".', tone: 'lilac', motif: 'compass', eyebrow: 'עקרונות מכוונים' },
   { key: 'celebrate', to: '/celebrate', title: 'חגיגה והשראה', line: 'מה כבר צומח סביבנו? אנשים, יוזמות ורגעים של שייכות.', tone: 'sun', motif: 'flower', eyebrow: 'השראה מההווה' },
 ];
-export const space = (key) => SPACES.find((s) => s.key === key);
 
 // כל מרחב: פתיח קצר (Intro) במסך עצמו, ושכבת "להעמיק" (Deep) למי שרוצה.
 export const DEFAULT_CONTENT = {
@@ -173,7 +172,6 @@ export const IDEA_KINDS = [
   { key: 'question', label: 'שאלה לחקירה משותפת', titleLabel: 'השאלה', placeholder: 'מה המצב? מה אנחנו מבקשים להבין? מה כבר ניסינו?' },
   { key: 'experiment', label: 'התנסות או יוזמה', titleLabel: 'ההתנסות או היוזמה', placeholder: 'מה קורה שם, ואיפה? מה למדנו עד עכשיו? מה היינו שמחים לחלוק או למצוא?' },
 ];
-export const ideaKind = (key) => IDEA_KINDS.find((k) => k.key === key) || IDEA_KINDS[0];
 
 export const LENSES = [
   {
@@ -244,3 +242,86 @@ export const DEFAULT_CARDS = [
   { deck: 'reality', order: 7, text: 'אם הקושי של התקופה הזאת היה מבקש מאיתנו משהו – מה הוא היה מבקש?' },
   { deck: 'reality', order: 8, text: 'מי בסביבה הקרובה שלך זקוק.ה למשהו שאת.ה יכול.ה לתת?' },
 ];
+
+// --- רשימות קטנות שהיו כתובות בתוך המסכים ---
+export const DREAM_LAYERS = [
+  { key: 'garden', title: 'גן החלומות', question: 'איך עשוי להיראות עולם שבו האפשרויות האלה מקבלות מקום?' },
+  { key: 'ours', title: 'החלום שלנו', question: 'מה אנחנו יכולים לדמיין וליצור יחד?' },
+  { key: 'mine', title: 'החלום שלי', question: 'מה אני מבקש.ת לעצמי, למשפחתי ולחיי?' },
+];
+export const STORY_KINDS = [
+  { key: 'outside', title: 'פוגשים בחוץ', text: 'אנשים, יוזמות, קהילות, פרויקטים והתנסויות שאנחנו פוגשים בעולם.' },
+  { key: 'ours', title: 'מתהווה אצלנו', text: 'דברים שאנחנו עצמנו יוצרים, מנסים ומפתחים.' },
+  { key: 'moments', title: 'רגעים של שייכות', text: 'רגעים קטנים, מפגשים, תובנות וחוויות שמזכירים לנו אילו חיים אפשריים.' },
+];
+export const DECKS = [
+  { key: 'inside', title: 'מבפנים', text: 'מהגוף, מהזיכרון, מהדמיון' },
+  { key: 'reality', title: 'מהמציאות', text: 'מהמפגש עם הכאב והצורך' },
+];
+export const FEEDBACK_TYPES = [
+  { key: 'feedback', label: 'משוב על האתר', hint: 'מה עובד? מה לא ברור? מה אפשר לשפר?' },
+  { key: 'idea', label: 'רעיון חדש', hint: 'מה חסר כאן? מה הייתם רוצים להוסיף?' },
+  { key: 'partner', label: 'שותפות בפיתוח', hint: 'רוצים לקחת חלק ביצירה, בתחזוקה, בתוכן, במפגשים או בחיבורים?' },
+];
+export const INVITE_WAYS = [
+  { key: 'dream', label: 'לשתף חלום או רעיון', tone: 'blossom' },
+  { key: 'question', label: 'להעלות שאלה לחקירה משותפת', tone: 'sky' },
+  { key: 'experiment', label: 'לשתף התנסות או יוזמה', tone: 'sage' },
+  { key: 'meet', label: 'להציע מפגש, ידע או תוכן', tone: 'sun', prompt: 'איזה מפגש, ידע או תוכן היינו רוצים להביא למרחב?' },
+  { key: 'connect', label: 'להציע חיבור לאדם או לארגון', tone: 'lilac', prompt: 'למי כדאי שנתחבר, ומה החיבור יכול להצמיח?' },
+];
+
+// --- תוויות וכותרות: כל מילה שמופיעה באתר ונערכת בממשק הניהול (לשונית "תוויות") ---
+// כל קבוצה היא [מפתח, תיאור בממשק, ברירת מחדל]. ערך שנשמר במסד (content/labels) גובר על ברירת המחדל.
+const fromList = (list, prefix, fields) => list.flatMap((x) => fields.map(([field, what]) => [
+  `${prefix}-${x.key}-${field}`, `${x.title || x.label} – ${what}`, x[field] || '',
+]));
+
+export const LABEL_GROUPS = [
+  { title: 'המרחבים (בתפריט, בדלתות ובראש כל מרחב)', items: fromList(SPACES, 'space', [['title', 'שם'], ['line', 'משפט בדלת'], ['eyebrow', 'כותרת קטנה']]) },
+  { title: 'שער הכניסה', items: [
+    ['gate-hello', 'ברכת הכניסה', 'ברוכות וברוכים הבאים 🌿'],
+    ['gate-sparks', 'כותרת פס הניצוצות', 'ניצוצות'],
+    ['gate-invite', 'כותרת ההזמנה', 'להביא משהו מעצמנו'],
+    ['gate-open', 'כותרת השאלה המלווה', 'שאלה שמלווה אותנו'],
+    ['gate-definition', 'קישור להגדרה', 'ההגדרה פתוחה לשיחה ולשינוי ←'],
+    ...fromList(INVITE_WAYS, 'way', [['label', 'כפתור'], ['prompt', 'שאלה בחלון']]).filter(([k]) => !/^(way-(dream|question|experiment)-prompt)$/.test(k)),
+  ] },
+  { title: 'החלום הרחב', items: [
+    ...fromList(DREAM_LAYERS, 'layer', [['title', 'שם השכבה'], ['question', 'שאלת השכבה']]),
+    ['dreams-add', 'כפתור הוספה', 'להוסיף ניצוץ ✦'],
+    ['dreams-nodream', 'כפתור "אין לי חלום"', 'אין לי חלום… (דגדוג חלומות)'],
+  ] },
+  { title: 'מרחבי חיים', items: [
+    ...fromList(IDEA_KINDS, 'kind', [['label', 'סוג'], ['titleLabel', 'כותרת השדה'], ['placeholder', 'רמז בשדה הפירוט']]),
+    ...fromList(LENSES, 'lens', [['title', 'שם העדשה'], ['question', 'שאלת העדשה']]),
+    ['categories-share', 'כפתור שיתוף', 'לשתף רעיון, שאלה או התנסות'],
+  ] },
+  { title: 'מעמיקים ומשתנים – המעיינות', items: fromList(SPRINGS, 'spring', [['title', 'שם'], ['short', 'שאלה קצרה'], ['text', 'להעמיק']]) },
+  { title: 'דגדוג חלומות ומהתפר', items: [
+    ...fromList(DECKS, 'deck', [['title', 'שם החפיסה'], ['text', 'תיאור']]),
+    ['pain-prompt', 'מהתפר – שאלת ההקשבה', 'איזה צורך לא נענה כאן? איזה חלום מסתתר בכאב?'],
+    ['pain-placeholder', 'מהתפר – רמז בשדה', 'מה כואב? מה מתסכל? מה כבר לא מחזיק?'],
+    ['pain-send', 'מהתפר – כפתור', 'לומר את זה'],
+  ] },
+  { title: 'העיתוי', items: [
+    ['voices-title', 'כותרת "קולות מהתפר"', 'קולות מהתפר'],
+  ] },
+  { title: 'חגיגה והשראה', items: [
+    ...fromList(STORY_KINDS, 'story', [['title', 'שם הלשונית'], ['text', 'משפט הלשונית']]),
+    ['celebrate-prompts', 'שאלות מזמינות (שאלה בכל שורה)', 'מה מעורר בנו השראה?\nאיפה אנחנו פוגשים משהו חדש שכבר צומח?\nאיזו יוזמה או התנסות מחזירה לנו אמון?\nאיזה רגע קטן גרם לנו להרגיש חלק ממשהו טוב?'],
+    ['celebrate-share', 'כפתור שיתוף', 'לשתף משהו שצומח'],
+    ['gidulei-eyebrow', 'גידולי בית – כותרת קטנה', 'עולם שכן · בזיקה, לא בכפיפות'],
+    ['gidulei-link', 'גידולי בית – קישור', 'לבקר בגידולי בית ←'],
+  ] },
+  { title: '"יש לנו רעיון" ומשוב', items: [
+    ['idea-button', 'הכפתור הקבוע', 'יש לנו רעיון 🌱'],
+    ['idea-intro', 'משפט פתיחה בחלון', 'הבית הזה נבנה יחד. אפשר לכתוב בלי להירשם.'],
+    ...fromList(FEEDBACK_TYPES, 'feedback', [['label', 'אפשרות'], ['hint', 'שאלה']]),
+    ['idea-thanks', 'תודה – כותרת', 'תודה! משהו קטן נזרע.'],
+    ['idea-thanks-text', 'תודה – טקסט', 'כל פנייה נקראת. הבית הזה אינו מוצר מוגמר – הוא מתהווה גם דרך מה שאנחנו מביאים אליו.'],
+    ['footer-share', 'קישור בתחתית העמוד', 'משתפים ומשפיעים 🌱'],
+    ['footer-line', 'שורה בתחתית העמוד', 'הדרך תמשיך להיות חכמה מאיתנו.'],
+  ] },
+];
+export const DEFAULT_LABELS = Object.fromEntries(LABEL_GROUPS.flatMap((g) => g.items.map(([k, , d]) => [k, d])));

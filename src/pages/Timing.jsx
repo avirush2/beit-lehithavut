@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, byNewest, visibleFor } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useT, byNewest, visibleFor } from '../lib/store.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { Deeper, PageHead } from '../components/Botanical.jsx';
 import { ItemActions } from '../components/ui.jsx';
@@ -8,6 +8,7 @@ import { ItemActions } from '../components/ui.jsx';
 function Voices() {
   const { isHost, requireUser, stamp } = useAuth();
   const intro = useContent('voicesIntro');
+  const t = useT();
   const items = visibleFor(useCollection('voices'), isHost)?.sort(byNewest).slice(0, 24);
   const [dissolving, setDissolving] = useState('');
   const [emerging, setEmerging] = useState('');
@@ -25,7 +26,7 @@ function Voices() {
 
   return (
     <section className="section">
-      <h2>קולות מהתפר</h2>
+      <h2>{t('voices-title')}</h2>
       <p className="muted">{intro}</p>
       <form className="voices-form" onSubmit={submit}>
         <label className="field"><span className="field-label">מה מתמוסס</span>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
-import { SPRINGS, STUDY_TOPICS } from '../content/defaults.js';
+import { useAuth, useCollection, useContent, useSprings, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
+import { STUDY_TOPICS } from '../content/defaults.js';
 import Comments from '../components/Comments.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { Motif, PageHead } from '../components/Botanical.jsx';
@@ -17,6 +17,7 @@ function StudyCircles() {
   const [spring, setSpring] = useState([]);
   const [mode, setMode] = useState(['בחבורה']);
   const [description, setDescription] = useState('');
+  const SPRINGS = useSprings();
 
   const create = async (e) => {
     e.preventDefault();
@@ -89,6 +90,7 @@ export default function Depth() {
   const deep = useContent('depthDeep');
   const assumptions = useContent('assumptions');
   const readings = useCollection('readings')?.slice().sort(byOrder) || [];
+  const SPRINGS = useSprings();
 
   return (
     <div className="page">

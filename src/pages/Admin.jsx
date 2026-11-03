@@ -6,7 +6,7 @@ import { seedMissing, upgradeWording } from '../lib/seed.js';
 import { nextHarvest } from '../lib/seasons.js';
 import { DEFAULT_CONTENT, SPRINGS } from '../content/defaults.js';
 import { Empty, Loading, formatDate } from '../components/ui.jsx';
-import { FEEDBACK_TYPES } from '../components/IdeaButton.jsx';
+import { FEEDBACK_TYPES, LABEL_GROUPS, DEFAULT_LABELS } from '../content/defaults.js';
 
 const TEXTS = [
   ['welcomeBody', 'שער הכניסה – טקסט הפתיחה'],
@@ -122,7 +122,44 @@ function Reports() {
   );
 }
 
-const FEEDBACK_STATUS = [['new', 'חדש'], ['working', 'בטיפול'], ['done', 'יושם'], ['later', 'לא כעת']];
+// תוויות וכותרות: כל המילים הקצרות באתר, בקבוצות לפי מרחב. נשמרות במסמך אחד (content/labels).
+function Labels() {
+  const doc = useDoc('content', 'labels');
+  const saved = doc?.labels || {};
+  const [drafts, setDrafts] = useState({});
+  const [status, setStatus] = useState('');
+  if (doc === undefined) return <Loading />;
+  const val = (k) => drafts[k] ?? saved[k] ?? DEFAULT_LABELS[k];
+  const dirty = Object.keys(drafts).length > 0;
+  const save = async () => {
+    await backend.set('content', 'labels', { labels: { ...saved, ...drafts } });
+    setDrafts({}); setStatus('נשמר'); setTimeout(() => setStatus(''), 1800);
+  };
+  return (
+    <>
+      <p className="muted">שמות המרחבים, כפתורים, שאלות קצרות וכותרות קטנות. שדה שמרוקן חוזר לנוסח המקורי.</p>
+      {LABEL_GROUPS.map((g) => (
+        <details key={g.title} className="card labels-group">
+          <summary>{g.title}</summary>
+          {g.items.map(([k, what, def]) => (
+            <label key={k} className="field">
+              <span className="field-label">{what}</span>
+              {def.length > 70 || def.includes('\n')
+                ? <textarea rows={Math.min(6, 2 + def.split('\n').length)} value={val(k)} placeholder={def} onChange={(e) => setDrafts({ ...drafts, [k]: e.target.value })} />
+                : <input value={val(k)} placeholder={def} onChange={(e) => setDrafts({ ...drafts, [k]: e.target.value })} />}
+            </label>
+          ))}
+        </details>
+      ))}
+      <div className="row-end labels-save">
+        {status ? <span className="notice inline">{status}</span> : null}
+        <button type="button" className="btn" disabled={!dirty} onClick={save}>שמירת השינויים</button>
+      </div>
+    </>
+  );
+}
+
+const FEEDBACK_STATUS =[['new', 'חדש'], ['working', 'בטיפול'], ['done', 'יושם'], ['later', 'לא כעת']];
 
 function Feedback() {
   const all = useCollection('feedback')?.sort(byNewest);
@@ -265,7 +302,7 @@ function Start() {
 }
 
 const TABS = [
-  ['start', 'התחלה'], ['texts', 'טקסטים'], ['compass', 'מצפן'], ['categories', 'מרחבי חיים'],
+  ['start', 'התחלה'], ['texts', 'טקסטים'], ['labels', 'תוויות וכותרות'], ['compass', 'מצפן'], ['categories', 'מרחבי חיים'],
   ['cards', 'קלפים'], ['readings', 'ספרייה'], ['feedback', 'משוב'], ['reports', 'דיווחים'], ['people', 'משתתפים'], ['settings', 'הגדרות'],
 ];
 
@@ -323,6 +360,7 @@ export default function Admin() {
           { key: 'title', label: 'כותרת' }, { key: 'author', label: 'מחבר.ת / מקום' }, { key: 'url', label: 'קישור', ltr: true }, { key: 'note', label: 'כמה מילים', type: 'textarea' }, { key: 'order', label: 'סדר', type: 'number' },
         ]} />
       ) : null}
+      {tab === 'labels' ? <Labels /> : null}
       {tab === 'feedback' ? <Feedback /> : null}
       {tab === 'reports' ? <Reports /> : null}
       {tab === 'people' ? <People /> : null}

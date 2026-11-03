@@ -1,14 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useSettings } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useDecks, useSettings } from '../lib/store.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { PageHead } from '../components/Botanical.jsx';
-
-const DECKS = [
-  { key: 'inside', title: 'מבפנים', text: 'מהגוף, מהזיכרון, מהדמיון' },
-  { key: 'reality', title: 'מהמציאות', text: 'מהמפגש עם הכאב והצורך' },
-];
 
 export default function Tickle() {
   const { user, isHost, requireUser } = useAuth();
@@ -16,6 +11,7 @@ export default function Tickle() {
   const intro = useContent('tickleIntro');
   const deep = useContent('tickleDeep');
   const settings = useSettings();
+  const DECKS = useDecks();
   const cards = useCollection('cards') || [];
 
   const [deck, setDeck] = useState(null);

@@ -544,6 +544,10 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 @media (max-width: 760px) { .idea-contact { grid-template-columns: 1fr; } }
 
 /* admin */
+.labels-group summary { cursor: pointer; font-family: var(--display); font-size: 1.2rem; }
+.labels-group[open] summary { margin-bottom: .8rem; }
+.labels-group .field { margin-bottom: .7rem; }
+.labels-save { position: sticky; bottom: 12px; }
 .editor-row { display: flex; flex-wrap: wrap; gap: .8rem; align-items: flex-end; }
 .editor-row .field { flex: 1 1 160px; }
 .editor-row .field.grow { flex: 3 1 280px; }

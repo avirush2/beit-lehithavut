@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDoc, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useDoc, useDreamLayers, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
 import { DREAM_THEMES } from '../content/defaults.js';
 import Garden from '../components/Garden.jsx';
 import Comments from '../components/Comments.jsx';
@@ -11,13 +11,6 @@ import GardenScene from '../components/GardenScene.jsx';
 import {
   Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Modal, Prose, useCompass,
 } from '../components/ui.jsx';
-
-// שלוש שכבות שאפשר לשוטט ביניהן – לא מסלול
-const LAYERS = [
-  { key: 'garden', title: 'גן החלומות', question: 'איך עשוי להיראות עולם שבו האפשרויות האלה מקבלות מקום?' },
-  { key: 'ours', title: 'החלום שלנו', question: 'מה אנחנו יכולים לדמיין וליצור יחד?' },
-  { key: 'mine', title: 'החלום שלי', question: 'מה אני מבקש.ת לעצמי, למשפחתי ולחיי?' },
-];
 
 function DreamCards({ dreams }) {
   return (
@@ -41,6 +34,8 @@ export function DreamsPage() {
   const deep = useContent('dreamsDeep');
   const dreams = visibleFor(useCollection('dreams'), isHost)?.sort(byNewest);
   const resonances = useCollection('resonances');
+  const LAYERS = useDreamLayers();
+  const t = useT();
   const [params, setParams] = useSearchParams();
   const view = LAYERS.some((l) => l.key === params.get('layer')) ? params.get('layer') : 'garden';
   const setView = (key) => setParams(key === 'garden' ? {} : { layer: key }, { replace: true });
@@ -54,8 +49,8 @@ export function DreamsPage() {
       </div>
       <PageHead spaceKey="dreams" lead={intro} deep={deep}>
         <div className="row-start">
-          <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>להוסיף ניצוץ ✦</button>
-          <Link to="/tickle" className="btn btn-ghost">אין לי חלום… (דגדוג חלומות)</Link>
+          <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
+          <Link to="/tickle" className="btn btn-ghost">{t('dreams-nodream')}</Link>
         </div>
       </PageHead>
 

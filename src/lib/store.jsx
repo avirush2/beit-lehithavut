@@ -1,6 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { backend, isDemo } from './backend.js';
-import { DEFAULT_CONTENT } from '../content/defaults.js';
+import {
+  DEFAULT_CONTENT, DEFAULT_LABELS, SPACES, DREAM_LAYERS, STORY_KINDS, DECKS, FEEDBACK_TYPES, INVITE_WAYS,
+  IDEA_KINDS, LENSES, SPRINGS,
+} from '../content/defaults.js';
 
 // null = עדיין נטען
 export function useCollection(col, filter) {
@@ -35,7 +38,44 @@ export function useSettings() {
   return useDoc('settings', 'site') || {};
 }
 
-export const byNewest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
+// תוויות וכותרות: מסמך אחד (content/labels) שנערך בממשק הניהול, עם ברירות מחדל מהקוד
+const LabelsCtx = createContext(DEFAULT_LABELS);
+
+export function LabelsProvider({ children }) {
+  const d = useDoc('content', 'labels');
+  const value = useMemo(() => ({ ...DEFAULT_LABELS, ...(d?.labels || {}) }), [d]);
+  return <LabelsCtx.Provider value={value}>{children}</LabelsCtx.Provider>;
+}
+
+export function useT() {
+  const labels = useContext(LabelsCtx);
+  // תווית שרוקנה בממשק הניהול חוזרת לנוסח המקורי
+  return useCallback((key) => labels[key] || DEFAULT_LABELS[key] || '', [labels]);
+}
+
+// רשימה מהקוד, כשהשדות הטקסטואליים שלה מוחלפים בתוויות הערוכות
+function useLocalized(list, prefix, fields) {
+  const t = useT();
+  return useMemo(() => list.map((x) => ({
+    ...x, ...Object.fromEntries(fields.map((f) => [f, t(`${prefix}-${x.key}-${f}`) || x[f]])),
+  })), [list, prefix, fields, t]);
+}
+const F = {
+  space: ['title', 'line', 'eyebrow'], layer: ['title', 'question'], story: ['title', 'text'], deck: ['title', 'text'],
+  feedback: ['label', 'hint'], way: ['label', 'prompt'], kind: ['label', 'titleLabel', 'placeholder'],
+  lens: ['title', 'question'], spring: ['title', 'short', 'text'],
+};
+export const useSpaces = () => useLocalized(SPACES, 'space', F.space);
+export const useDreamLayers = () => useLocalized(DREAM_LAYERS, 'layer', F.layer);
+export const useStoryKinds = () => useLocalized(STORY_KINDS, 'story', F.story);
+export const useDecks = () => useLocalized(DECKS, 'deck', F.deck);
+export const useFeedbackTypes = () => useLocalized(FEEDBACK_TYPES, 'feedback', F.feedback);
+export const useInviteWays = () => useLocalized(INVITE_WAYS, 'way', F.way);
+export const useIdeaKinds = () => useLocalized(IDEA_KINDS, 'kind', F.kind);
+export const useLenses = () => useLocalized(LENSES, 'lens', F.lens);
+export const useSprings = () => useLocalized(SPRINGS, 'spring', F.spring);
+
+export const byNewest =(a, b) => (b.createdAt || 0) - (a.createdAt || 0);
 export const byOldest = (a, b) => (a.createdAt || 0) - (b.createdAt || 0);
 export const byOrder = (a, b) => (a.order ?? 999) - (b.order ?? 999);
 
@@ -85,7 +125,7 @@ export function AuthProvider({ children }) {
     stamp: () => ({ uid: user?.uid, name }),
   }), [user, name, isAdmin, isHost, owner, signInOpen, requireUser]);
 
-  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+  return <AuthCtx.Provider value={value}><LabelsProvider>{children}</LabelsProvider></AuthCtx.Provider>;
 }
 
 export const useAuth = () => useContext(AuthCtx);

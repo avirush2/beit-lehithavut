@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDoc, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
-import { IDEA_KINDS, LENSES, ideaKind } from '../content/defaults.js';
+import { useAuth, useCollection, useContent, useDoc, useIdeaKinds, useLenses, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
+
+function useKind() {
+  const kinds = useIdeaKinds();
+  return (key) => kinds.find((k) => k.key === key) || kinds[0];
+}
+
 import { nextHarvest } from '../lib/seasons.js';
 import Comments from '../components/Comments.jsx';
 import { HarvestBanner, Paths } from '../components/Layout.jsx';
@@ -19,6 +24,7 @@ export function CategoriesPage() {
   const count = (id) => ideas.filter((i) => i.categoryId === id && !i.hidden).length;
   const [params] = useSearchParams();
   const share = params.get('share');
+  const ideaKind = useKind();
 
   return (
     <div className="page">
@@ -49,7 +55,8 @@ function IdeaForm({ categoryId, idea, initialKind, onDone }) {
   const [title, setTitle] = useState(idea?.title || '');
   const [body, setBody] = useState(idea?.body || '');
   const [compass, setCompass] = useState(idea?.compass || []);
-  const k = ideaKind(kind);
+  const IDEA_KINDS = useIdeaKinds();
+  const k = IDEA_KINDS.find((x) => x.key === kind) || IDEA_KINDS[0];
   const save = async (e) => {
     e.preventDefault();
     if (!requireUser() || !title.trim()) return;
@@ -128,6 +135,8 @@ export function CategoryView() {
   const ideas = visibleFor(useCollection('ideas', ['categoryId', id]), isHost)?.sort(byNewest);
   const comments = useCollection('comments') || [];
   const [adding, setAdding] = useState(!!share);
+  const ideaKind = useKind();
+  const t = useT();
   useEffect(() => { if (share) setAdding(true); }, [share]);
 
   if (category === undefined) return <div className="page"><Loading /></div>;
@@ -143,7 +152,7 @@ export function CategoryView() {
         <p className="lead">{category.description}</p>
       </header>
       {adding ? <IdeaForm categoryId={id} initialKind={share} onDone={() => setAdding(false)} /> : (
-        <button type="button" className="btn" onClick={() => requireUser() && setAdding(true)}>לשתף רעיון, שאלה או התנסות</button>
+        <button type="button" className="btn" onClick={() => requireUser() && setAdding(true)}>{t('categories-share')}</button>
       )}
       <section className="section">
         {ideas == null ? <Loading /> : ideas.length === 0 ? <Empty>עוד אין רעיונות במרחב הזה. אולי הרעיון הראשון מחכה בתוך חלום רחב?</Empty> : (
@@ -176,6 +185,8 @@ export function IdeaView() {
   const idea = useDoc('ideas', id);
   const category = useDoc(idea?.categoryId ? 'categories' : null, idea?.categoryId);
   const [editing, setEditing] = useState(false);
+  const LENSES = useLenses();
+  const ideaKind = useKind();
   const [lens, setLens] = useState(LENSES[0].key);
   const tabsRef = useRef(null);
   useEffect(() => { setEditing(false); }, [id]);
