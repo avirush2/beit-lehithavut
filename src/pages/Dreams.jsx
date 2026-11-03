@@ -24,7 +24,7 @@ export function DreamsPage() {
   return (
     <div className="page">
       <div className="space-scene tone-blossom">
-        <GardenScene height={200} flowers={30} sparks={26} seed={11} />
+        <GardenScene height={200} flowers={30} seed={11} />
       </div>
       <PageHead spaceKey="dreams" lead={intro} deep={deep}>
         <div className="row-start">

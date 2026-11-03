@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 
-// סצנת גן מאוירת: גבעות בשכבות עם קצוות "מצוירים", פרחי בר בגדלים ובצבעים שונים,
-// וניצוצות צבעוניים שמתקבצים מעל הגן – הדימוי של חלומות שמתפזרים בינינו ונאספים לתמונה אחת.
+// סצנת גן מאוירת ושקטה: גבעות בשכבות עם קצוות "מצוירים", ופרחי בר בגדלים ובצבעים שונים.
 const W = 1200;
 
 // מחולל פסאודו־אקראי קבוע, כדי שהגן ייראה אותו דבר בכל טעינה
@@ -60,13 +59,13 @@ function Flower({ kind, x, y, s, c }) {
 // גובה הגבעה הקדמית בנקודה x (קירוב לעקומה המצוירת)
 const frontY = (x, H, k) => H - 52 * k + (Math.sin(x / 140) * 9 + Math.sin(x / 47) * 3) * k;
 
-export default function GardenScene({ height = 360, flowers = 50, sparks = 40, seed = 7, className = '' }) {
+export default function GardenScene({ height = 360, flowers = 50, seed = 7, className = '' }) {
   const H = height;
-  // סצנה נמוכה (כמו בראש מרחב) – גבעות ופרחים מתכווצים, כדי להשאיר שמיים לניצוצות
+  // סצנה נמוכה (כמו בראש מרחב) – גבעות ופרחים מתכווצים בהתאם
   const k = Math.min(1, H / 360);
   const sky = H - 195 * k;
   const hill = (v) => H - v * k;
-  const { blooms, dots, links } = useMemo(() => {
+  const blooms = useMemo(() => {
     const r = rng(seed);
     const kinds = ['daisy', 'poppy', 'tulip', 'spike', 'bud', 'grass', 'daisy', 'poppy', 'grass'];
     const blooms = Array.from({ length: flowers }, (_, i) => {
@@ -77,27 +76,8 @@ export default function GardenScene({ height = 360, flowers = 50, sparks = 40, s
         s: (0.6 + depth * 0.9 + r() * 0.25) * (0.55 + 0.45 * k), c: Math.floor(r() * PETALS.length),
       };
     }).sort((a, b) => a.y - b.y);
-    const dots = Array.from({ length: sparks }, (_, i) => {
-      // הניצוצות מתקבצים לשלושה אשכולות מעל הגן
-      const cluster = i % 3;
-      const cx = [W * 0.34, W * 0.5, W * 0.66][cluster];
-      const cy = sky * (cluster === 1 ? 0.5 : 0.62);
-      const a = r() * Math.PI * 2;
-      const d = 18 + r() * 70;
-      return {
-        id: i, x: cx + Math.cos(a) * d * 1.4, y: cy + Math.sin(a) * d * 0.7 * k, r: 3.4 + r() * 5.2,
-        c: Math.floor(r() * PETALS.length), dx: (r() - 0.5) * 520, dy: (r() - 0.3) * 240, delay: r() * 1.4,
-      };
-    });
-    const links = [];
-    for (let i = 0; i < dots.length; i += 1) {
-      for (let j = i + 1; j < dots.length; j += 1) {
-        const a = dots[i]; const b = dots[j];
-        if (Math.hypot(a.x - b.x, a.y - b.y) < 58 && links.length < 26) links.push({ a, b, id: `${i}-${j}` });
-      }
-    }
-    return { blooms, dots, links };
-  }, [H, k, sky, flowers, sparks, seed]);
+    return blooms;
+  }, [H, k, flowers, seed]);
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" className={`garden-scene ${className}`} aria-hidden="true">
@@ -107,18 +87,6 @@ export default function GardenScene({ height = 360, flowers = 50, sparks = 40, s
           <feDisplacementMap in="SourceGraphic" scale="7" />
         </filter>
       </defs>
-
-      <g className="gs-links">
-        {links.map(({ a, b, id }) => <line key={id} x1={a.x} y1={a.y} x2={b.x} y2={b.y} />)}
-      </g>
-      <g className="gs-sparks">
-        {dots.map((d) => (
-          <g key={d.id} className="gs-spark" style={{ '--dx': `${d.dx}px`, '--dy': `${d.dy}px`, '--delay': `${d.delay}s` }}>
-            <circle cx={d.x} cy={d.y} r={d.r * 3} fill={PETALS[d.c]} opacity=".55" />
-            <circle cx={d.x} cy={d.y} r={d.r} fill={INKS[d.c]} />
-          </g>
-        ))}
-      </g>
 
       <path className="gs-bird" d={`M${W * 0.12} ${sky * 0.3} q 8 -7 15 0 q 7 -7 15 0`} />
       <path className="gs-bird" d={`M${W * 0.66} ${sky * 0.18} q 6 -5 11 0 q 5 -5 11 0`} />

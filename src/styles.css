@@ -234,7 +234,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .gate-tag { font-family: var(--display); font-size: clamp(1.15rem, 2.6vw, 1.5rem); color: var(--muted); margin-bottom: 1.4rem; }
 .gate-text p { font-size: 1.12rem; }
 .gate-text p:last-child { margin-bottom: 0; }
-.gate-scene { display: block; width: 100%; height: clamp(230px, 32vw, 400px); margin-top: -1.5rem; }
+.gate-scene { display: block; width: 100%; height: clamp(150px, 20vw, 260px); margin-top: 1rem; }
 .center { text-align: center; }
 
 /* סצנת הגן והניצוצות */
@@ -245,12 +245,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .garden-scene .gs-leaf { fill: color-mix(in srgb, var(--sage-ink) 70%, var(--sage)); }
 .garden-scene .gs-grass path { fill: none; stroke: var(--sage-ink); stroke-width: 1.3; stroke-linecap: round; opacity: .75; }
 .garden-scene .gs-bird { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; opacity: .55; }
-.garden-scene .gs-links line { stroke: var(--sun-ink); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0; animation: links-in 1.6s ease 2.6s forwards; }
-.gs-spark { animation: gather 2.4s cubic-bezier(.2, .7, .2, 1) var(--delay) both, twinkle 3.6s ease-in-out calc(var(--delay) + 2.4s) infinite alternate; }
-@keyframes gather { from { transform: translate(var(--dx), var(--dy)); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes twinkle { from { opacity: 1; } to { opacity: .55; } }
-@keyframes links-in { to { opacity: .45; } }
-.space-scene { margin: -2rem calc(-1 * clamp(16px, 4vw, 40px)) 0; height: 180px; overflow: hidden; border-radius: 0 0 40% 40% / 0 0 26px 26px;
+.space-scene { margin: -2rem calc(-1 * clamp(16px, 4vw, 40px)) 0; height: 120px; overflow: hidden; border-radius: 0 0 40% 40% / 0 0 26px 26px;
   background: radial-gradient(60% 90% at 70% 10%, color-mix(in srgb, var(--blossom) 45%, transparent), transparent 70%), radial-gradient(40% 70% at 20% 20%, color-mix(in srgb, var(--sun) 35%, transparent), transparent 70%); }
 .space-scene .garden-scene { width: 100%; height: 100%; display: block; }
 
@@ -276,9 +271,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
   border: 0; padding: .55em 1.1em; border-radius: 99px; font-size: .98rem; color: var(--fg);
   background: color-mix(in srgb, var(--tone) 75%, var(--surface)); box-shadow: 0 6px 16px -12px rgba(0, 0, 0, .5); transition: transform .2s;
 }
-.way:nth-child(odd) { transform: rotate(-.8deg); }
-.way:nth-child(even) { transform: rotate(.7deg); }
-.way:hover { transform: translateY(-2px) rotate(0); }
+.way:hover { transform: translateY(-2px); }
 .btn-bloom { background: var(--blossom-ink); border-color: var(--blossom-ink); color: #fff; }
 .badge.kind-question { background: color-mix(in srgb, var(--sky) 60%, var(--surface)); color: var(--fg); }
 .badge.kind-experiment { background: color-mix(in srgb, var(--sage) 70%, var(--surface)); color: var(--fg); }
@@ -354,9 +347,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
   border: 1px solid color-mix(in srgb, var(--tone) 60%, var(--line)); color: inherit; text-decoration: none; transition: transform .2s;
 }
 .door:nth-child(even) { border-radius: 30px 22px 34px 24px / 22px 30px 24px 32px; }
-.door:nth-child(3n) { transform: rotate(.6deg); }
-.door:nth-child(3n+1) { transform: rotate(-.5deg); }
-.door:hover { transform: translateY(-3px) rotate(-.8deg); }
+.door:hover { transform: translateY(-3px); }
 .door.big {
   grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 1.8rem;
   background:
@@ -417,7 +408,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .stem { fill: none; stroke: var(--moss); stroke-width: 2; stroke-linecap: round; }
 .leaf { fill: var(--moss); opacity: .75; }
 .bloom { stroke: var(--surface); stroke-width: 1.5; transition: r .2s; }
-.bloom-glow { opacity: .22; animation: twinkle 3.2s ease-in-out infinite alternate; }
+.bloom-glow { opacity: .22; }
 .bloom-core { fill: var(--surface); }
 .plant.hover .bloom, .plant:focus .bloom { r: 9; }
 .plant:focus { outline: none; }
@@ -462,7 +453,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 }
 .deck-inside { background: linear-gradient(160deg, var(--forest), color-mix(in srgb, var(--forest) 70%, var(--c4))); }
 .deck-reality { background: linear-gradient(160deg, color-mix(in srgb, var(--bark) 85%, #000), color-mix(in srgb, var(--bark) 60%, var(--c2))); }
-.deck:hover:not(:disabled) { transform: translateY(-3px) rotate(-.6deg); }
+.deck:hover:not(:disabled) { transform: translateY(-3px); }
 .deck.on { box-shadow: 0 0 0 3px var(--pollen); }
 .deck-title { font-family: var(--display); font-size: 1.8rem; }
 .deck-text { font-size: .92rem; opacity: .8; }
@@ -524,7 +515,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
   padding: .55em 1.1em; border-radius: 99px; border: 0; font-family: var(--display); font-size: 1.05rem;
   background: var(--sun); color: var(--fg); box-shadow: 0 8px 22px -10px rgba(60, 40, 0, .5); transition: transform .2s;
 }
-.idea-fab:hover { transform: translateY(-2px) rotate(-1.5deg); }
+.idea-fab:hover { transform: translateY(-2px); }
 .idea-form .chips { margin: .4rem 0 1rem; }
 .idea-contact { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
 .idea-thanks-title { font-family: var(--display); font-size: 1.5rem; color: var(--moss); }
@@ -566,7 +557,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
   .door { padding: 1rem; }
   .door.big { grid-column: span 2; grid-row: auto; min-height: 210px; }
   .door.wide { grid-column: span 2; }
-  .space-scene { height: 140px; }
+  .space-scene { height: 90px; }
 }
 @media (min-width: 761px) and (max-width: 1000px) {
   .doors { grid-template-columns: repeat(3, minmax(0, 1fr)); }
