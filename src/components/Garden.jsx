@@ -93,6 +93,7 @@ export default function Garden({ dreams, resonances }) {
                 const side = k % 2 ? -1 : 1;
                 return <path key={k} d={`M0,${y} q${side * 9},-5 ${side * 13},-1 q${side * -6},6 ${side * -13},1`} className="leaf" />;
               })}
+              <circle cy={-h} r="15" style={{ fill: p.color }} className="bloom-glow" />
               <circle cy={-h} r="6.5" style={{ fill: p.color }} className="bloom" />
               <circle cy={-h} r="2.4" className="bloom-core" />
             </g>
@@ -100,7 +101,7 @@ export default function Garden({ dreams, resonances }) {
         })}
       </svg>
       <div className="garden-caption" aria-live="polite">
-        {hovered ? <><strong>{hovered.title}</strong> · {hovered.name}</> : 'כל צמח הוא חלום. לחיצה פותחת אותו. חוטים מחברים חלומות שמהדהדים זה את זה.'}
+        {hovered ? <><strong>{hovered.title}</strong> · {hovered.name}</> : 'כל צמח הוא ניצוץ של חלום. לחיצה פותחת אותו. חוטים מחברים ניצוצות שמאירים זה את זה.'}
       </div>
     </div>
   );

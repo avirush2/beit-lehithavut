@@ -1,11 +1,18 @@
 import { Component, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { backend, isDemo } from '../lib/backend.js';
-import { useAuth, useSettings } from '../lib/store.jsx';
+import { useAuth, useCollection, useSettings } from '../lib/store.jsx';
 import { harvestWindow } from '../lib/seasons.js';
 import { SITE, SPACES, space } from '../content/defaults.js';
 import { Motif } from './Botanical.jsx';
 import SignIn from './SignIn.jsx';
+import IdeaButton, { openIdea } from './IdeaButton.jsx';
+
+// מונה פניות חדשות – נטען רק אצל מארחים (רק להם מותר לקרוא פניות)
+function NewFeedbackCount() {
+  const fresh = useCollection('feedback', ['status', 'new']);
+  return fresh?.length ? <span className="count-badge" title="פניות חדשות ב'יש לנו רעיון'">{fresh.length}</span> : null;
+}
 
 export const NAV = [
   { to: '/', label: 'שער הכניסה', end: true },
@@ -89,7 +96,7 @@ export default function Layout() {
           </span>
         </Link>
         <div className="user-area">
-          {isHost ? <Link to="/admin" className="link-btn">{isAdmin ? 'ניהול' : 'אירוח'}</Link> : null}
+          {isHost ? <Link to="/admin" className="link-btn">{isAdmin ? 'ניהול' : 'אירוח'}<NewFeedbackCount /></Link> : null}
           {user ? (
             <>
               <span className="hello">שלום, {name}</span>
@@ -112,7 +119,11 @@ export default function Layout() {
         <Rings size={26} />
         <p>{SITE.name} · {SITE.tagline}</p>
         <p className="muted small">הדרך תמשיך להיות חכמה מאיתנו.</p>
+        <p className="footer-share">
+          הבית הזה נבנה יחד · <button type="button" className="link-btn" onClick={() => openIdea()}>משתפים ומשפיעים 🌱</button>
+        </p>
       </footer>
+      <IdeaButton />
       <MusicPlayer />
       <SignIn />
     </div>

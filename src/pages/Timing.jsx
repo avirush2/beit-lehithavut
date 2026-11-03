@@ -67,7 +67,7 @@ export default function Timing() {
       <ul className="ponder">
         {list.map((q) => <li key={q}>{q}</li>)}
       </ul>
-      <Deeper text={body} label="להעמיק · מתוך הכתיבה של אבי" />
+      <Deeper text={body} />
       <Voices />
       <Paths keys={['threshold', 'dreams', 'depth']} />
     </div>

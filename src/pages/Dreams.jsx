@@ -7,6 +7,7 @@ import Garden from '../components/Garden.jsx';
 import Comments from '../components/Comments.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { PageHead } from '../components/Botanical.jsx';
+import GardenScene from '../components/GardenScene.jsx';
 import {
   Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Modal, Prose, useCompass,
 } from '../components/ui.jsx';
@@ -22,15 +23,18 @@ export function DreamsPage() {
 
   return (
     <div className="page">
+      <div className="space-scene tone-blossom">
+        <GardenScene height={200} flowers={30} sparks={26} seed={11} />
+      </div>
       <PageHead spaceKey="dreams" lead={intro} deep={deep}>
         <div className="row-start">
-          <button type="button" className="btn" onClick={() => requireUser() && navigate('/dreams/new')}>לשתף חלום</button>
+          <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>להוסיף ניצוץ ✦</button>
           <Link to="/tickle" className="btn btn-ghost">אין לי חלום… (דגדוג חלומות)</Link>
         </div>
       </PageHead>
 
       {dreams == null ? <Loading /> : dreams.length === 0 ? (
-        <Empty>הגן עוד ריק. החלום הראשון יהיה הזרע הראשון.</Empty>
+        <Empty>הגן עוד ריק. הניצוץ הראשון יהיה הזרע הראשון.</Empty>
       ) : (
         <>
           <div className="tabs" role="tablist">
@@ -51,7 +55,7 @@ export function DreamsPage() {
           )}
         </>
       )}
-      <Paths keys={['categories', 'tickle', 'journal']} />
+      <Paths keys={['categories', 'tickle', 'timing']} />
     </div>
   );
 }

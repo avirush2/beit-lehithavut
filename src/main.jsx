@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AuthProvider } from './lib/store.jsx';
 import { backend, isDemo } from './lib/backend.js';
 import { seedMissing } from './lib/seed.js';
@@ -8,7 +8,6 @@ import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import Timing from './pages/Timing.jsx';
 import NewDefinition from './pages/NewDefinition.jsx';
-import { MyDreamEntry, MyDreamList } from './pages/MyDream.jsx';
 import { DreamForm, DreamView, DreamsPage } from './pages/Dreams.jsx';
 import { CategoriesPage, CategoryView, IdeaView } from './pages/Categories.jsx';
 import Depth from './pages/Depth.jsx';
@@ -17,6 +16,11 @@ import { ThresholdPage, ThresholdPost } from './pages/Threshold.jsx';
 import Admin from './pages/Admin.jsx';
 import { Empty } from './components/ui.jsx';
 import './styles.css';
+
+function OldJournalLink() {
+  const { id } = useParams();
+  return <Navigate to={`/dreams/${id}`} replace />;
+}
 
 function App() {
   return (
@@ -27,8 +31,9 @@ function App() {
             <Route index element={<Home />} />
             <Route path="timing" element={<Timing />} />
             <Route path="new" element={<NewDefinition />} />
-            <Route path="my-dream" element={<MyDreamList />} />
-            <Route path="my-dream/:id" element={<MyDreamEntry />} />
+            {/* היומן הישן עבר לגן החלומות – קישורים ישנים ממשיכים לעבוד */}
+            <Route path="my-dream" element={<Navigate to="/dreams" replace />} />
+            <Route path="my-dream/:id" element={<OldJournalLink />} />
             <Route path="dreams" element={<DreamsPage />} />
             <Route path="dreams/new" element={<DreamForm />} />
             <Route path="dreams/:id" element={<DreamView />} />

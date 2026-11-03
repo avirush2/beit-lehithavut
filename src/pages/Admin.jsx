@@ -6,15 +6,18 @@ import { seedMissing, upgradeWording } from '../lib/seed.js';
 import { nextHarvest } from '../lib/seasons.js';
 import { DEFAULT_CONTENT, SPRINGS } from '../content/defaults.js';
 import { Empty, Loading, formatDate } from '../components/ui.jsx';
+import { FEEDBACK_TYPES } from '../components/IdeaButton.jsx';
 
 const TEXTS = [
   ['welcomeBody', 'שער הכניסה – טקסט הפתיחה'],
   ['welcomeQuestion', 'שער הכניסה – השאלה מעל השבילים'],
+  ['sparksBody', 'שער הכניסה – הניצוצות'],
+  ['inviteBody', 'שער הכניסה – הזמנה להביא משהו מעצמנו'],
   ['openQuestion', 'שאלה שמלווה אותנו (בשער הכניסה)'],
   ['timingTitle', 'העיתוי – כותרת'],
   ['timingIntro', 'העיתוי – משפט פתיחה'],
   ['timingQuestions', 'העיתוי – שאלות להתבוננות (שאלה בכל שורה)'],
-  ['timingBody', 'העיתוי – להעמיק (הכתיבה של אבי)'],
+  ['timingBody', 'העיתוי – להעמיק'],
   ['voicesIntro', 'הזמנה ל"קולות מהתפר"'],
   ['dreamsIntro', 'החלום הרחב – פתיח קצר'],
   ['dreamsDeep', 'החלום הרחב – להעמיק'],
@@ -113,6 +116,58 @@ function Reports() {
   );
 }
 
+const FEEDBACK_STATUS = [['new', 'חדש'], ['working', 'בטיפול'], ['done', 'יושם'], ['later', 'לא כעת']];
+
+function Feedback() {
+  const all = useCollection('feedback')?.sort(byNewest);
+  const [status, setStatus] = useState('new');
+  const [type, setType] = useState('');
+  const [notes, setNotes] = useState({});
+  if (all == null) return <Loading />;
+  const shown = all.filter((f) => (!status || f.status === status) && (!type || f.type === type));
+  const count = (s) => all.filter((f) => f.status === s).length;
+  return (
+    <>
+      <p className="muted">פניות מהכפתור "יש לנו רעיון 🌱". פרטי הקשר גלויים רק למארחים.</p>
+      <div className="row-start wrap">
+        <div className="chips">
+          {FEEDBACK_STATUS.map(([k, l]) => (
+            <button key={k} type="button" className={`chip ${status === k ? 'on' : ''}`} onClick={() => setStatus(status === k ? '' : k)}>{l} ({count(k)})</button>
+          ))}
+        </div>
+        <select value={type} onChange={(e) => setType(e.target.value)} style={{ width: 'auto' }}>
+          <option value="">כל הסוגים</option>
+          {FEEDBACK_TYPES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+        </select>
+      </div>
+      {shown.length === 0 ? <Empty>אין כאן פניות כרגע.</Empty> : (
+        <ul className="admin-list">
+          {shown.map((f) => (
+            <li key={f.id} className="card">
+              <div className="badges">
+                <span className="badge">{FEEDBACK_TYPES.find((t) => t.key === f.type)?.label || f.type}</span>
+                <span className="badge">{formatDate(f.createdAt)}</span>
+                {f.path ? <Link to={f.path} className="badge">{f.path}</Link> : null}
+              </div>
+              <p className="pre">{f.message}</p>
+              {f.name || f.contact ? <p className="small"><strong>{f.name}</strong>{f.name && f.contact ? ' · ' : ''}<span dir="auto">{f.contact}</span></p> : null}
+              <label className="field"><span className="field-label">הערה פנימית</span>
+                <input value={notes[f.id] ?? f.note ?? ''} onChange={(e) => setNotes({ ...notes, [f.id]: e.target.value })} onBlur={() => notes[f.id] != null && backend.update('feedback', f.id, { note: notes[f.id] })} />
+              </label>
+              <div className="row-between wrap">
+                <select value={f.status || 'new'} onChange={(e) => backend.update('feedback', f.id, { status: e.target.value })} style={{ width: 'auto' }}>
+                  {FEEDBACK_STATUS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                </select>
+                <button type="button" className="link-btn quiet" onClick={() => window.confirm('למחוק את הפנייה לצמיתות?') && backend.remove('feedback', f.id)}>מחיקה</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
 function People() {
   const { isAdmin, owner } = useAuth();
   const users = useCollection('users')?.sort(byNewest);
@@ -164,6 +219,7 @@ function Settings() {
 }
 
 function Start() {
+  const { user, owner, stamp } = useAuth();
   const categories = useCollection('categories')?.filter((c) => c.active).sort(byOrder) || [];
   const harvests = useCollection('harvests') || [];
   const [result, setResult] = useState(null);
@@ -176,14 +232,14 @@ function Start() {
     <>
       <section className="card">
         <h2>תוכן הפתיחה</h2>
-        <p className="muted">טוען את הטקסטים, ההגדרה, המצפן, מרחבי החיים, הקלפים, הספרייה והרשומה הראשונה ביומן. רק מה שעוד חסר נכתב – עריכות קיימות לא נדרסות.</p>
+        <p className="muted">טוען את הטקסטים, ההגדרה, המצפן, מרחבי החיים, הקלפים והספרייה. רק מה שעוד חסר נכתב – עריכות קיימות לא נדרסות.</p>
         <button type="button" className="btn" disabled={busy} onClick={async () => { setBusy(true); try { setResult(await seedMissing()); } finally { setBusy(false); } }}>טעינת תוכן הפתיחה</button>
         {result ? <p className="notice">{result.length ? `נטען: ${result.join(', ')}` : 'הכל כבר קיים.'}</p> : null}
       </section>
       <section className="card">
         <h2>עדכון לנוסח החדש</h2>
-        <p className="muted">מעדכן את הטקסטים ואת מרחבי החיים לנוסח האחרון (קול משותף, פתיח קצר ושכבת "להעמיק"), ומוסיף טקסטים חדשים. טקסט שערכת בעצמך לא משתנה.</p>
-        <button type="button" className="btn" disabled={busy} onClick={async () => { setBusy(true); try { setUpgraded(await upgradeWording()); } finally { setBusy(false); } }}>עדכון לנוסח החדש</button>
+        <p className="muted">מעדכן את הטקסטים, ההגדרה ומרחבי החיים לנוסח האחרון בקול משותף, ומוסיף טקסטים חדשים. טקסט שנערך ידנית לא משתנה. רשומות היומן הישן עוברות לגן החלומות כחלומות רגילים (המקור נשמר מוסתר, לא נמחק).</p>
+        <button type="button" className="btn" disabled={busy} onClick={async () => { setBusy(true); try { setUpgraded(await upgradeWording({ stamp: stamp(), isOwner: isDemo || owner?.uid === user?.uid })); } finally { setBusy(false); } }}>עדכון לנוסח החדש</button>
         {upgraded ? <p className="notice">{upgraded.length ? upgraded.join(' · ') : 'הכל כבר מעודכן.'}</p> : null}
       </section>
       <section className="card">
@@ -203,7 +259,7 @@ function Start() {
 
 const TABS = [
   ['start', 'התחלה'], ['texts', 'טקסטים'], ['compass', 'מצפן'], ['categories', 'מרחבי חיים'],
-  ['cards', 'קלפים'], ['readings', 'ספרייה'], ['reports', 'דיווחים'], ['people', 'משתתפים'], ['settings', 'הגדרות'],
+  ['cards', 'קלפים'], ['readings', 'ספרייה'], ['feedback', 'משוב'], ['reports', 'דיווחים'], ['people', 'משתתפים'], ['settings', 'הגדרות'],
 ];
 
 export default function Admin() {
@@ -219,7 +275,7 @@ export default function Admin() {
         <h1>הקמת המרחב</h1>
         <div className="card">
           <p>עוד אין מארח ראשי למרחב. מי שלוחצ.ת כאן ראשונ.ה הופכ.ת למארח.ת הראשי.ת – ואי אפשר לשנות את זה מהאתר.</p>
-          <button type="button" className="btn" onClick={() => backend.set('meta', 'owner', { uid: user.uid, name: stamp().name, createdAt: Date.now() }, false)}>אני המארח הראשי</button>
+          <button type="button" className="btn" onClick={() => backend.set('meta', 'owner', { uid: user.uid, createdAt: Date.now() }, false)}>אני המארח הראשי</button>
         </div>
       </div>
     );
@@ -260,6 +316,7 @@ export default function Admin() {
           { key: 'title', label: 'כותרת' }, { key: 'author', label: 'מחבר.ת / מקום' }, { key: 'url', label: 'קישור', ltr: true }, { key: 'note', label: 'כמה מילים', type: 'textarea' }, { key: 'order', label: 'סדר', type: 'number' },
         ]} />
       ) : null}
+      {tab === 'feedback' ? <Feedback /> : null}
       {tab === 'reports' ? <Reports /> : null}
       {tab === 'people' ? <People /> : null}
       {tab === 'settings' ? <Settings /> : null}
