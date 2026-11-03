@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useDoc, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
 import { DREAM_THEMES } from '../content/defaults.js';
@@ -12,14 +12,40 @@ import {
   Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Modal, Prose, useCompass,
 } from '../components/ui.jsx';
 
+// שלוש שכבות שאפשר לשוטט ביניהן – לא מסלול
+const LAYERS = [
+  { key: 'garden', title: 'גן החלומות', question: 'איך עשוי להיראות עולם שבו האפשרויות האלה מקבלות מקום?' },
+  { key: 'ours', title: 'החלום שלנו', question: 'מה אנחנו יכולים לדמיין וליצור יחד?' },
+  { key: 'mine', title: 'החלום שלי', question: 'מה אני מבקש.ת לעצמי, למשפחתי ולחיי?' },
+];
+
+function DreamCards({ dreams }) {
+  return (
+    <div className="grid">
+      {dreams.map((d) => (
+        <Link key={d.id} to={`/dreams/${d.id}`} className={`card dream-card ${d.hidden ? 'is-hidden' : ''}`}>
+          <h3>{d.title}</h3>
+          <p className="excerpt">{(d.body || '').slice(0, 180)}{(d.body || '').length > 180 ? '…' : ''}</p>
+          {d.themes?.length ? <div className="badges">{d.themes.map((t) => <span key={t} className="badge">{t}</span>)}</div> : null}
+          <Byline name={d.name} createdAt={d.createdAt} hidden={d.hidden} />
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export function DreamsPage() {
-  const { isHost, requireUser } = useAuth();
+  const { user, isHost, requireUser } = useAuth();
   const navigate = useNavigate();
   const intro = useContent('dreamsIntro');
   const deep = useContent('dreamsDeep');
   const dreams = visibleFor(useCollection('dreams'), isHost)?.sort(byNewest);
   const resonances = useCollection('resonances');
-  const [view, setView] = useState('garden');
+  const [params, setParams] = useSearchParams();
+  const view = LAYERS.some((l) => l.key === params.get('layer')) ? params.get('layer') : 'garden';
+  const setView = (key) => setParams(key === 'garden' ? {} : { layer: key }, { replace: true });
+  const layer = LAYERS.find((l) => l.key === view);
+  const mine = user ? (dreams || []).filter((d) => d.uid === user.uid) : [];
 
   return (
     <div className="page">
@@ -33,28 +59,22 @@ export function DreamsPage() {
         </div>
       </PageHead>
 
-      {dreams == null ? <Loading /> : dreams.length === 0 ? (
+      <div className="tabs" role="tablist" aria-label="שכבות החלום">
+        {LAYERS.map((l) => (
+          <button key={l.key} type="button" role="tab" aria-selected={view === l.key} className={view === l.key ? 'on' : ''} onClick={() => setView(l.key)}>{l.title}</button>
+        ))}
+      </div>
+      <p className="layer-question">{layer.question}</p>
+
+      {dreams == null ? <Loading /> : view === 'mine' ? (
+        !user ? (
+          <Empty>כאן נאספים החלומות שלך. <button type="button" className="link-btn" onClick={() => requireUser()}>כניסה</button> – ואז אפשר להתחיל לכתוב.</Empty>
+        ) : mine.length === 0 ? (
+          <Empty>עוד לא כתבת כאן חלום. אפשר להתחיל ממשפט אחד – או לשלוף קלף ב<Link to="/tickle">דגדוג חלומות</Link>.</Empty>
+        ) : <DreamCards dreams={mine} />
+      ) : dreams.length === 0 ? (
         <Empty>הגן עוד ריק. הניצוץ הראשון יהיה הזרע הראשון.</Empty>
-      ) : (
-        <>
-          <div className="tabs" role="tablist">
-            <button type="button" role="tab" aria-selected={view === 'garden'} className={view === 'garden' ? 'on' : ''} onClick={() => setView('garden')}>גן החלומות</button>
-            <button type="button" role="tab" aria-selected={view === 'list'} className={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>רשימה</button>
-          </div>
-          {view === 'garden' ? <Garden dreams={dreams} resonances={resonances || []} /> : (
-            <div className="grid">
-              {dreams.map((d) => (
-                <Link key={d.id} to={`/dreams/${d.id}`} className={`card dream-card ${d.hidden ? 'is-hidden' : ''}`}>
-                  <h3>{d.title}</h3>
-                  <p className="excerpt">{(d.body || '').slice(0, 180)}{(d.body || '').length > 180 ? '…' : ''}</p>
-                  {d.themes?.length ? <div className="badges">{d.themes.map((t) => <span key={t} className="badge">{t}</span>)}</div> : null}
-                  <Byline name={d.name} createdAt={d.createdAt} hidden={d.hidden} />
-                </Link>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+      ) : view === 'garden' ? <Garden dreams={dreams} resonances={resonances || []} /> : <DreamCards dreams={dreams} />}
       <Paths keys={['categories', 'tickle', 'timing']} />
     </div>
   );

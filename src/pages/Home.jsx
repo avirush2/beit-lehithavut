@@ -8,7 +8,35 @@ import { Prose } from '../components/ui.jsx';
 import { SITE, SPACES } from '../content/defaults.js';
 
 // גדלים שונים לדלתות – כדי שהשער ירגיש כמו גן ולא כמו טבלה
-const DOOR_SIZE = { dreams: 'big', categories: 'wide', threshold: 'wide' };
+const DOOR_SIZE = { dreams: 'big', celebrate: 'wide' };
+
+// מה צומח עכשיו: מה שהצטרף לאחרונה – חלומות, רעיונות ושיתופי השראה. מתחלף מעצמו.
+function Growing() {
+  const title = useContent('growingQuestion');
+  const pick = (items, kind, to) => (items || []).filter((x) => !x.hidden).map((x) => ({ ...x, kind, to: to(x) }));
+  const dreams = useCollection('dreams');
+  const ideas = useCollection('ideas');
+  const stories = useCollection('stories');
+  const all = [
+    ...pick(dreams, 'ניצוץ של חלום', (x) => `/dreams/${x.id}`),
+    ...pick(ideas, 'במרחבי החיים', (x) => `/ideas/${x.id}`),
+    ...pick(stories, 'חגיגה והשראה', () => '/celebrate'),
+  ].sort(byNewest).slice(0, 4);
+  if (!all.length) return null;
+  return (
+    <section className="section growing">
+      <h2 className="center">{title}</h2>
+      <div className="growing-list">
+        {all.map((x) => (
+          <Link key={`${x.kind}-${x.id}`} to={x.to} className="growing-item">
+            <span className="muted small">{x.kind}</span>
+            <strong>{x.title}</strong>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function Invite() {
   const { requireUser } = useAuth();
@@ -78,6 +106,8 @@ export default function Home() {
         </div>
       </section>
 
+      <Growing />
+
       <Invite />
 
       {current ? (
@@ -85,7 +115,7 @@ export default function Home() {
           <div className="band-inner">
             <p className="eyebrow">מהו חדש?</p>
             <blockquote className="definition">{current.text}</blockquote>
-            <Link to="/new">ההגדרה פתוחה לשיחה ולשינוי ←</Link>
+            <Link to="/compass#new">ההגדרה פתוחה לשיחה ולשינוי ←</Link>
           </div>
         </section>
       ) : null}

@@ -7,7 +7,8 @@ import { PageHead } from '../components/Botanical.jsx';
 
 const STATUS = { open: 'פתוחה לשיחה', accepted: 'התקבלה', declined: 'לא כעת' };
 
-export default function NewDefinition() {
+// ההגדרה החיה של "מהו חדש". מוצגת כשכבה בתוך מרחב המצפן (embedded), או כדף בפני עצמו.
+export default function NewDefinition({ embedded = false }) {
   const { isHost, requireUser, stamp, name } = useAuth();
   const intro = useContent('newIntro');
   const versions = useCollection('definitionVersions')?.slice().sort(byNewest);
@@ -33,8 +34,14 @@ export default function NewDefinition() {
   };
 
   return (
-    <div className="page">
-      <PageHead spaceKey="new" lead={intro} />
+    <div className={embedded ? 'living-def' : 'page'} id={embedded ? 'new' : undefined}>
+      {embedded ? (
+        <header className="section-head">
+          <p className="eyebrow">הגדרה מתהווה</p>
+          <h2>מהו חדש?</h2>
+          <p className="muted">{intro}</p>
+        </header>
+      ) : <PageHead spaceKey="compass" title="מהו חדש?" lead={intro} />}
 
       {versions == null ? <Loading /> : current ? (
         <section className="card definition-card">
@@ -59,9 +66,9 @@ export default function NewDefinition() {
       ) : <Empty>ההגדרה עוד לא נטענה. מארחים יכולים לטעון את תוכן הפתיחה בממשק הניהול.</Empty>}
 
       <section className="section">
-        <h2>הצעה לניסוח אחר</h2>
+        <h3>הצעה לניסוח אחר</h3>
         <form className="card form" onSubmit={propose}>
-          <label className="field"><span className="field-label">איך את.ה היית מנסח.ת?</span>
+          <label className="field"><span className="field-label">איך היינו מנסחים אחרת?</span>
             <textarea rows={6} value={text} onChange={(e) => setText(e.target.value)} placeholder="אפשר להעתיק את ההגדרה ולשנות בה מה שמבקש להשתנות" />
           </label>
           <label className="field"><span className="field-label">מה מבקש להשתנות, ולמה?</span>
@@ -75,7 +82,7 @@ export default function NewDefinition() {
       </section>
 
       <section className="section">
-        <h2>הצעות ושיחה</h2>
+        <h3>הצעות ושיחה</h3>
         {proposals == null ? <Loading /> : proposals.length === 0 ? <Empty>עוד אין הצעות.</Empty> : proposals.map((p) => (
           <article key={p.id} className={`card proposal ${p.hidden ? 'is-hidden' : ''}`}>
             <span className={`badge status-${p.status}`}>{STATUS[p.status] || p.status}</span>

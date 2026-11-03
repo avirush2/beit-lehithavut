@@ -13,6 +13,12 @@ const TEXTS = [
   ['welcomeQuestion', 'שער הכניסה – השאלה מעל השבילים'],
   ['sparksBody', 'שער הכניסה – הניצוצות'],
   ['inviteBody', 'שער הכניסה – הזמנה להביא משהו מעצמנו'],
+  ['growingQuestion', 'שער הכניסה – כותרת "מה צומח עכשיו"'],
+  ['compassIntro', 'המצפן – פתיח קצר'],
+  ['compassDeep', 'המצפן – להעמיק'],
+  ['celebrateIntro', 'חגיגה והשראה – פתיח קצר'],
+  ['celebrateDeep', 'חגיגה והשראה – להעמיק'],
+  ['gideiBayit', 'גידולי בית – הכרטיס ב"מתהווה אצלנו"'],
   ['openQuestion', 'שאלה שמלווה אותנו (בשער הכניסה)'],
   ['timingTitle', 'העיתוי – כותרת'],
   ['timingIntro', 'העיתוי – משפט פתיחה'],
@@ -31,7 +37,7 @@ const TEXTS = [
   ['tickleDeep', 'דגדוג חלומות – "ומה אם אין לי חלום?"'],
   ['painIntro', 'מהתפר – פתיח קצר'],
   ['painDeep', 'מהתפר – להעמיק'],
-  ['newIntro', 'מהו חדש – פתיח'],
+  ['newIntro', 'מהו חדש – פתיח (בתוך המצפן)'],
 ];
 
 function TextEditor({ k, label }) {
@@ -210,6 +216,7 @@ function Settings() {
       {f('musicTitle', 'שם היצירה (מופיע במעבר עכבר)')}
       {f('meditationUrl', 'קישור לקובץ מדיטציה מונחית', 'מופיע בדף דגדוג החלומות. גם כאן: /audio/שם-הקובץ.mp3')}
       {f('meditationTitle', 'כותרת המדיטציה')}
+      {f('gideiBayitUrl', 'קישור לגידולי בית', 'מופיע בכרטיס של גידולי בית ב"חגיגה והשראה" ← "מתהווה אצלנו"')}
       <p className="hint">חשוב: רק מוזיקה שלך או ברישיון שימוש חופשי.</p>
       <div className="row-end">{status ? <span className="notice inline">{status}</span> : null}
         <button type="button" className="btn" onClick={async () => { await backend.set('settings', 'site', s); setStatus('נשמר'); setTimeout(() => setStatus(''), 1800); }}>שמירה</button>

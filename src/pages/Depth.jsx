@@ -133,7 +133,7 @@ export default function Depth() {
         <h2>הצעות למקורות ושיחה על מהות השינוי</h2>
         <Comments targetType="depth" targetId="library" placeholder="ספר, מאמר, מקום, מסורת, ניסוי שכבר קיים – או מחשבה על השינוי שמתקיים עכשיו" />
       </section>
-      <Paths keys={['categories', 'tickle', 'new']} />
+      <Paths keys={['categories', 'tickle', 'compass']} />
     </div>
   );
 }

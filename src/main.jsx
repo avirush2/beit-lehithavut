@@ -7,7 +7,8 @@ import { seedMissing } from './lib/seed.js';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import Timing from './pages/Timing.jsx';
-import NewDefinition from './pages/NewDefinition.jsx';
+import Compass from './pages/Compass.jsx';
+import Celebrate from './pages/Celebrate.jsx';
 import { DreamForm, DreamView, DreamsPage } from './pages/Dreams.jsx';
 import { CategoriesPage, CategoryView, IdeaView } from './pages/Categories.jsx';
 import Depth from './pages/Depth.jsx';
@@ -30,7 +31,9 @@ function App() {
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="timing" element={<Timing />} />
-            <Route path="new" element={<NewDefinition />} />
+            <Route path="compass" element={<Compass />} />
+            <Route path="new" element={<Navigate to="/compass#new" replace />} />
+            <Route path="celebrate" element={<Celebrate />} />
             {/* היומן הישן עבר לגן החלומות – קישורים ישנים ממשיכים לעבוד */}
             <Route path="my-dream" element={<Navigate to="/dreams" replace />} />
             <Route path="my-dream/:id" element={<OldJournalLink />} />

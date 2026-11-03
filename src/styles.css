@@ -509,6 +509,21 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .or { display: flex; align-items: center; gap: .6rem; color: var(--muted); font-size: .8rem; margin: 1rem 0; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
+.home .growing { max-width: 1040px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); }
+.growing-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .8rem; }
+.growing-item { display: flex; flex-direction: column; gap: .2rem; padding: .9rem 1rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); color: var(--fg); text-decoration: none; }
+.growing-item:hover { border-color: var(--moss); }
+.compass-cards { list-style: none; padding: 0; margin: 0 0 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.compass-card { position: relative; margin: 0; background: linear-gradient(165deg, color-mix(in srgb, var(--lilac) 28%, var(--surface)), var(--surface) 60%); }
+.compass-num { position: absolute; top: .8rem; inset-inline-end: 1rem; font-family: var(--display); font-size: 1.6rem; color: var(--lilac-ink); opacity: .6; }
+.compass-card p { color: var(--muted); margin-bottom: .5rem; }
+.compass-card .compass-q { font-family: var(--display); font-size: 1.1rem; color: var(--fg); margin: 0; }
+.living-def { margin-top: 2.6rem; padding-top: 1.6rem; border-top: 1px dashed var(--line); }
+.prompts { list-style: none; padding: 0; margin: .6rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.prompts li { font-size: .9rem; padding: .25em .8em; border-radius: 99px; background: color-mix(in srgb, var(--sun) 40%, var(--surface)); }
+.guest-card { background: linear-gradient(165deg, color-mix(in srgb, var(--sage) 40%, var(--surface)), var(--surface) 65%); border-style: dashed; }
+.layer-question { font-family: var(--display); font-size: 1.2rem; color: var(--muted); margin: -.4rem 0 1rem; }
+
 /* יש לנו רעיון */
 .idea-fab {
   position: fixed; bottom: 16px; inset-inline-end: 16px; z-index: 45;
