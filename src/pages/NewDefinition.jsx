@@ -3,13 +3,12 @@ import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, byNewest, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
 import { Byline, Empty, ItemActions, Loading, Prose, formatDate } from '../components/ui.jsx';
-import { PageHead } from '../components/Botanical.jsx';
-import { Paths } from '../components/Layout.jsx';
+import { SectionHead } from '../components/Botanical.jsx';
 
 const STATUS = { open: 'פתוחה לשיחה', accepted: 'התקבלה', declined: 'לא כעת' };
 
-// ההגדרה החיה של "מהו חדש". מוצגת כשכבה בתוך מרחב המצפן (embedded), או כדף בפני עצמו.
-export default function NewDefinition({ embedded = false }) {
+// ההגדרה החיה של "מהו חדש" – חלק בעמוד אודות
+export default function NewDefinition() {
   const { isHost, requireUser, stamp, name } = useAuth();
   const intro = useContent('newIntro');
   const versions = useCollection('definitionVersions')?.slice().sort(byNewest);
@@ -35,14 +34,8 @@ export default function NewDefinition({ embedded = false }) {
   };
 
   return (
-    <div className={embedded ? 'living-def' : 'page'} id={embedded ? 'new' : undefined}>
-      {embedded ? (
-        <header className="section-head">
-          <p className="eyebrow">הגדרה מתהווה</p>
-          <h2>מהו חדש?</h2>
-          <p className="muted">{intro}</p>
-        </header>
-      ) : <PageHead spaceKey="new" lead={intro} />}
+    <div className="living-def" id="new">
+      <SectionHead spaceKey="new" lead={intro} />
 
       {versions == null ? <Loading /> : current ? (
         <section className="card definition-card">
@@ -106,7 +99,6 @@ export default function NewDefinition({ embedded = false }) {
           </article>
         ))}
       </section>
-      {embedded ? null : <Paths keys={['compass', 'vision', 'timing']} />}
     </div>
   );
 }

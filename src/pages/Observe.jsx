@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useT, byNewest, visibleFor } from '../lib/store.jsx';
-import { Paths } from '../components/Layout.jsx';
-import { PageHead } from '../components/Botanical.jsx';
-import { ItemActions, LifeSpacePicker, SpaceBadges } from '../components/ui.jsx';
+import { GroupHead } from '../components/Botanical.jsx';
+import { ItemActions, LifeSpacePicker, Prose, SpaceBadges } from '../components/ui.jsx';
 
-// התבוננות (כנף החישה): שאלות על התקופה, וקולות קצרים – מה מתמוסס ומה מבקש להתהוות
+// חישה ← התבוננות: שאלות על התקופה, וקולות קצרים – מה מתמוסס ומה מבקש להתהוות
 function Voices() {
   const { isHost, requireUser, stamp } = useAuth();
   const intro = useContent('voicesIntro');
@@ -67,12 +66,12 @@ export default function Observe() {
 
   return (
     <div className="page">
-      <PageHead spaceKey="observe" lead={intro} />
+      <GroupHead group="sensing" current="observe" />
+      <Prose text={intro} className="sub-lead" />
       <ul className="ponder">
         {list.map((q) => <li key={q}>{q}</li>)}
       </ul>
       <Voices />
-      <Paths keys={['threshold', 'celebrate', 'dreams']} />
     </div>
   );
 }

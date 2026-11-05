@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useDoc, useDreamLayers, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
-import { DREAM_THEMES } from '../content/defaults.js';
-import Garden from '../components/Garden.jsx';
 import Comments from '../components/Comments.jsx';
-import { Paths } from '../components/Layout.jsx';
-import { PageHead } from '../components/Botanical.jsx';
+import { GroupHead, SectionHead } from '../components/Botanical.jsx';
 import GardenScene from '../components/GardenScene.jsx';
+import Tickle from './Tickle.jsx';
 import {
   Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, LifeSpacePicker, Loading, Modal, Prose, SpaceBadges, authorOf, useCompass,
 } from '../components/ui.jsx';
@@ -19,7 +17,7 @@ function DreamCards({ dreams }) {
         <Link key={d.id} to={`/dreams/${d.id}`} className={`card dream-card ${d.hidden ? 'is-hidden' : ''}`}>
           <h3>{d.title}</h3>
           <p className="excerpt">{(d.body || '').slice(0, 180)}{(d.body || '').length > 180 ? '…' : ''}</p>
-          {d.themes?.length ? <div className="badges">{d.themes.map((t) => <span key={t} className="badge">{t}</span>)}</div> : null}
+          <SpaceBadges ids={d.spaces} />
           <Byline name={authorOf(d)} createdAt={d.createdAt} hidden={d.hidden} />
         </Link>
       ))}
@@ -27,18 +25,17 @@ function DreamCards({ dreams }) {
   );
 }
 
+// עמוד החלימה: שיתוף חלום, ומתחתיו הנבעת חלום. (גן החלומות מוסתר כרגע – החלומות מוצגים כרשימה.)
 export function DreamsPage() {
   const { user, isHost, requireUser } = useAuth();
   const navigate = useNavigate();
   const intro = useContent('dreamsIntro');
-  const deep = useContent('dreamsDeep');
   const dreams = visibleFor(useCollection('dreams'), isHost)?.sort(byNewest);
-  const resonances = useCollection('resonances');
   const LAYERS = useDreamLayers();
   const t = useT();
   const [params, setParams] = useSearchParams();
-  const view = LAYERS.some((l) => l.key === params.get('layer')) ? params.get('layer') : 'garden';
-  const setView = (key) => setParams(key === 'garden' ? {} : { layer: key }, { replace: true });
+  const view = LAYERS.some((l) => l.key === params.get('layer')) ? params.get('layer') : LAYERS[0].key;
+  const setView = (key) => setParams(key === LAYERS[0].key ? {} : { layer: key }, { replace: true });
   const layer = LAYERS.find((l) => l.key === view);
   const mine = user ? (dreams || []).filter((d) => d.uid === user.uid) : [];
 
@@ -47,12 +44,15 @@ export function DreamsPage() {
       <div className="space-scene tone-blossom">
         <GardenScene height={200} flowers={30} seed={11} />
       </div>
-      <PageHead spaceKey="dreams" lead={intro} deep={deep}>
-        <div className="row-start">
-          <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
-          <Link to="/tickle" className="btn btn-ghost">{t('dreams-nodream')}</Link>
-        </div>
-      </PageHead>
+      <GroupHead group="dreaming" current="dreams" />
+
+      <section className="section" id="dreams">
+        <SectionHead spaceKey="dreams" lead={intro}>
+          <div className="row-start">
+            <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
+            <Link to="/dreams#tickle" className="btn btn-ghost">{t('dreams-nodream')}</Link>
+          </div>
+        </SectionHead>
 
       <div className="tabs" role="tablist" aria-label="שכבות החלום">
         {LAYERS.map((l) => (
@@ -65,12 +65,14 @@ export function DreamsPage() {
         !user ? (
           <Empty>כאן נאספים החלומות שלך. <button type="button" className="link-btn" onClick={() => requireUser()}>כניסה</button> – ואז אפשר להתחיל לכתוב.</Empty>
         ) : mine.length === 0 ? (
-          <Empty>עוד לא כתבת כאן חלום. אפשר להתחיל ממשפט אחד – או לשלוף קלף ב<Link to="/tickle">דגדוג חלומות</Link>.</Empty>
+          <Empty>עוד לא כתבת כאן חלום. אפשר להתחיל ממשפט אחד – או לשלוף קלף ב<Link to="/dreams#tickle">הנבעת חלום</Link>.</Empty>
         ) : <DreamCards dreams={mine} />
       ) : dreams.length === 0 ? (
-        <Empty>הגן עוד ריק. הניצוץ הראשון יהיה הזרע הראשון.</Empty>
-      ) : view === 'garden' ? <Garden dreams={dreams} resonances={resonances || []} /> : <DreamCards dreams={dreams} />}
-      <Paths keys={['tickle', 'categories', 'observe']} />
+        <Empty>עוד אין כאן חלומות. הניצוץ הראשון מחכה.</Empty>
+      ) : <DreamCards dreams={dreams} />}
+      </section>
+
+      <Tickle />
     </div>
   );
 }
@@ -85,8 +87,8 @@ export function DreamForm() {
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState(location.state?.draft || '');
+  // ערוגות גן החלומות: הבחירה מוסתרת כל עוד הגן מוסתר, ומה שכבר נבחר נשמר כמו שהוא
   const [themes, setThemes] = useState([]);
-  const [freeTheme, setFreeTheme] = useState('');
   const [marked, setMarked] = useState([]);
   const [spaces, setSpaces] = useState([]);
   const [asOrg, setAsOrg] = useState(false);
@@ -105,8 +107,6 @@ export function DreamForm() {
 
   useEffect(() => { if (!loading && !user) requireUser(); }, [loading, user, requireUser]);
 
-  const allThemes = useMemo(() => [...new Set([...DREAM_THEMES, ...themes])], [themes]);
-
   const save = async (e) => {
     e.preventDefault();
     if (!requireUser() || !title.trim() || !body.trim()) return;
@@ -123,17 +123,11 @@ export function DreamForm() {
     } finally { setBusy(false); }
   };
 
-  const addFree = () => {
-    const t = freeTheme.trim();
-    if (t && !themes.includes(t)) setThemes([...themes, t]);
-    setFreeTheme('');
-  };
-
   return (
     <div className="page">
-      <Link to="/dreams" className="back">→ שיתוף חלום</Link>
+      <Link to="/dreams" className="back">→ חלימה</Link>
       <h1>{id ? 'עריכת החלום' : 'לשתף חלום'}</h1>
-      {id ? null : <p className="muted">צריכים עזרה להתחבר לחלימה? <Link to="/tickle">הנבעת חלום</Link> – קלפים ושאלות שפותחים את הדמיון.</p>}
+      {id ? null : <p className="muted">צריכים עזרה להתחבר לחלימה? <Link to="/dreams#tickle">הנבעת חלום</Link> – קלפים ושאלות שפותחים את הדמיון.</p>}
       <div className="write-layout">
         <form className="card form" onSubmit={save}>
           <div className="field"><span className="field-label">משתפים בשם…</span>
@@ -149,21 +143,13 @@ export function DreamForm() {
           <label className="field"><span className="field-label">החלום</span>
             <textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)} required placeholder="איך נראים החיים שאת.ה מבקש.ת לחיות? איך נראה הריפוי שמבקש להתהוות דרכך?" />
           </label>
-          <div className="field">
-            <span className="field-label">באיזו ערוגה הוא צומח? (הנושא הראשון קובע את מקומו בגן)</span>
-            <Chips options={allThemes} value={themes} onChange={setThemes} />
-            <div className="inline-add">
-              <input value={freeTheme} onChange={(e) => setFreeTheme(e.target.value)} placeholder="נושא משלך" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addFree(); } }} />
-              <button type="button" className="btn btn-small btn-ghost" onClick={addFree}>הוספה</button>
-            </div>
-          </div>
           <LifeSpacePicker value={spaces} onChange={setSpaces} label="באילו מרחבי חיים הוא נוגע? (לא חובה – כך הוא יופיע גם שם)" />
           <div className="field">
             <span className="field-label">נוגע במצפן? (לא חובה)</span>
             <CompassPicker value={marked} onChange={setMarked} />
           </div>
           <div className="row-end">
-            <button className="btn" disabled={busy || !title.trim() || !body.trim()}>{id ? 'שמירה' : 'לשתול בגן'}</button>
+            <button className="btn" disabled={busy || !title.trim() || !body.trim()}>{id ? 'שמירה' : 'לשתף'}</button>
           </div>
         </form>
         <aside className="compass-aside">
@@ -221,7 +207,7 @@ function ResonateModal({ open, onClose, dream }) {
   };
   return (
     <Modal open={open} onClose={onClose} title="מהדהד לי עם…">
-      <p className="muted">איזה חלום אחר החלום הזה מזכיר לך? החוט ביניהם יופיע בגן.</p>
+      <p className="muted">איזה חלום אחר החלום הזה מזכיר לך? החוט ביניהם יופיע בעמוד של שני החלומות.</p>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="חיפוש" />
       <ul className="pick-list">
         {shown.length === 0 ? <li className="muted">אין עוד חלומות אחרים.</li> : shown.map((d) => (
@@ -257,7 +243,7 @@ export function DreamView() {
 
   if (dream === undefined) return <div className="page"><Loading /></div>;
   if (dream === null || (dream.hidden && !isHost && dream.uid !== user?.uid)) {
-    return <div className="page"><Empty>החלום לא נמצא. <Link to="/dreams">חזרה לגן</Link></Empty></div>;
+    return <div className="page"><Empty>החלום לא נמצא. <Link to="/dreams">חזרה לחלימה</Link></Empty></div>;
   }
 
   const linked = (resonances || [])
@@ -266,9 +252,8 @@ export function DreamView() {
 
   return (
     <div className="page">
-      <Link to="/dreams" className="back">→ גן החלומות</Link>
+      <Link to="/dreams" className="back">→ חלימה</Link>
       <article className={`reading ${dream.hidden ? 'is-hidden' : ''}`}>
-        {dream.themes?.length ? <div className="badges">{dream.themes.map((t) => <span key={t} className="badge">{t}</span>)}</div> : null}
         <h1>{dream.title}</h1>
         <Byline name={authorOf(dream)} createdAt={dream.createdAt} hidden={dream.hidden} />
         <SpaceBadges ids={dream.spaces} />

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCollection, useContent, useSettings, useT, byNewest } from '../lib/store.jsx';
-import { HarvestBanner, useHouse } from '../components/Layout.jsx';
+import { HarvestBanner } from '../components/Layout.jsx';
 import GardenScene from '../components/GardenScene.jsx';
 import { Prose } from '../components/ui.jsx';
 import { SITE } from '../content/defaults.js';
@@ -33,37 +33,6 @@ function Growing() {
   );
 }
 
-// מפת ההתמצאות: שתי כנפיים, לב ושתי רגליים – וכפתורי גישה לכל מרחב
-const MAP_TEXT = { dreaming: 'mapDreaming', sensing: 'mapSensing', becoming: 'mapBecoming', about: 'mapAbout', together: 'mapTogether' };
-
-function HousePart({ g }) {
-  const text = useContent(MAP_TEXT[g.key]);
-  return (
-    <article className={`house-part part-${g.key} tone-${g.tone}`}>
-      <h3 className="hand">{g.name}</h3>
-      <p>{text}</p>
-      <div className="house-links">
-        {g.items.map((s) => (s.open
-          ? <button key={s.key} type="button" className="house-link" onClick={s.open}>{s.title}</button>
-          : <Link key={s.key} to={s.to} className="house-link">{s.title}</Link>))}
-      </div>
-    </article>
-  );
-}
-
-function HouseMap() {
-  const intro = useContent('mapIntro');
-  const house = useHouse();
-  return (
-    <section className="section house-map">
-      <p className="house-intro">{intro}</p>
-      <div className="house">
-        {house.map((g) => <HousePart key={g.key} g={g} />)}
-      </div>
-    </section>
-  );
-}
-
 export default function Home() {
   const welcome = useContent('welcomeBody');
   const settings = useSettings();
@@ -82,8 +51,6 @@ export default function Home() {
       </section>
 
       <HarvestBanner />
-
-      <HouseMap />
 
       {settings.showGrowing ? <Growing /> : null}
     </div>

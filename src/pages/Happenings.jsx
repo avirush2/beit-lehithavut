@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDoc, useHappeningKinds, useSprings, useT, byNewest, visibleFor } from '../lib/store.jsx';
-import { STUDY_TOPICS } from '../content/defaults.js';
+import { useAuth, useDoc, useHappeningKinds, useT } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
-import { Paths } from '../components/Layout.jsx';
-import { PageHead } from '../components/Botanical.jsx';
 import {
-  Byline, Chips, Empty, ItemActions, LifeSpacePicker, Loading, Modal, Prose, SpaceBadges,
+  Byline, Empty, ItemActions, LifeSpacePicker, Loading, Prose, SpaceBadges,
 } from '../components/ui.jsx';
 
-const MODES = ['לבד', 'בצמד', 'בחבורה'];
+// התרחשויות חיות בתוך מרחבי החיים: מוצעות משם, ומופיעות ברשימה "מה צומח במרחב".
 // הפרטים שכל סוג התרחשות יכול לבקש, ושמם הקצר בכרטיס
 const DETAILS = [['who', 'עם'], ['when', 'מתי'], ['where', 'איפה'], ['join', 'איך מצטרפים'], ['link', 'קישור']];
 
@@ -94,144 +91,17 @@ export function HappeningForm({ initial, propose, onDone }) {
   );
 }
 
-function StudyCircles() {
-  const { user, isHost, requireUser, stamp, name } = useAuth();
-  const t = useT();
-  const circles = visibleFor(useCollection('studyCircles'), isHost)?.sort(byNewest);
-  const [open, setOpen] = useState(false);
-  const [topic, setTopic] = useState('');
-  const [spring, setSpring] = useState([]);
-  const [mode, setMode] = useState(['בחבורה']);
-  const [description, setDescription] = useState('');
-  const SPRINGS = useSprings();
-
-  const create = async (e) => {
-    e.preventDefault();
-    if (!requireUser() || !topic.trim()) return;
-    await backend.add('studyCircles', {
-      topic: topic.trim(), spring: spring[0] || '', mode: mode[0] || '', description: description.trim(),
-      members: [{ uid: user.uid, name }], ...stamp(),
-    });
-    setOpen(false); setTopic(''); setDescription(''); setSpring([]);
-  };
-
-  const toggleJoin = async (c) => {
-    if (!requireUser()) return;
-    const members = c.members || [];
-    const inIt = members.some((m) => m.uid === user.uid);
-    await backend.update('studyCircles', c.id, {
-      members: inIt ? members.filter((m) => m.uid !== user.uid) : [...members, { uid: user.uid, name }],
-    });
-  };
-
-  return (
-    <section className="section">
-      <h2>{t('happenings-circles')}</h2>
-      <p className="muted">בוחרים נושא, מעיין השראה ואופן למידה. מי שמרגיש.ה משיכה – מצטרפ.ת.</p>
-      {open ? (
-        <form className="card form" onSubmit={create}>
-          <label className="field"><span className="field-label">נושא המחקר</span>
-            <input list="study-topics" value={topic} onChange={(e) => setTopic(e.target.value)} required />
-            <datalist id="study-topics">{STUDY_TOPICS.map((x) => <option key={x} value={x} />)}</datalist>
-          </label>
-          <div className="field"><span className="field-label">מעיין ההשראה</span>
-            <Chips options={SPRINGS.map((s) => s.title)} value={spring} onChange={setSpring} single />
-          </div>
-          <div className="field"><span className="field-label">אופן הלמידה</span><Chips options={MODES} value={mode} onChange={setMode} single /></div>
-          <label className="field"><span className="field-label">כמה מילים על הכוונה</span>
-            <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="להתבונן, לשהות, להקשיב, ליצור, לחקור, לנוע…" />
-          </label>
-          <div className="row-end"><button type="button" className="btn btn-ghost" onClick={() => setOpen(false)}>ביטול</button><button className="btn">פתיחת קבוצה</button></div>
-        </form>
-      ) : <button type="button" className="btn btn-ghost" onClick={() => requireUser() && setOpen(true)}>לפתוח נושא למחקר</button>}
-
-      {circles?.length ? (
-        <div className="grid">
-          {circles.map((c) => {
-            const inIt = user && (c.members || []).some((m) => m.uid === user.uid);
-            return (
-              <article key={c.id} className={`card circle ${c.hidden ? 'is-hidden' : ''}`}>
-                <div className="badges">
-                  {c.mode ? <span className="badge">{c.mode}</span> : null}
-                  {c.spring ? <span className="badge compass-badge">{c.spring}</span> : null}
-                </div>
-                <h3>{c.topic}</h3>
-                {c.description ? <p>{c.description}</p> : null}
-                <p className="muted small">{(c.members || []).map((m) => m.name).join(', ')}</p>
-                <div className="row-between">
-                  <button type="button" className="btn btn-small btn-ghost" onClick={() => toggleJoin(c)}>{inIt ? 'לעזוב' : 'להצטרף'}</button>
-                  <ItemActions col="studyCircles" item={c} />
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-export function HappeningCards({ items }) {
+export function HappeningCard({ h }) {
   const kindOf = useKindOf();
   return (
-    <div className="grid">
-      {items.map((h) => (
-        <Link key={h.id} to={`/happenings/${h.id}`} className={`card happening-card kind-${h.kind} ${h.hidden ? 'is-hidden' : ''}`}>
-          <span className="badge">{kindOf(h.kind).title}</span>
-          <h3>{h.title}</h3>
-          <dl className="happening-meta">
-            {DETAILS.filter(([k]) => k !== 'link' && h[k]).map(([k, l]) => <div key={k}><dt>{l}</dt><dd>{h[k]}</dd></div>)}
-          </dl>
-          {h.kind === 'written' && h.closed ? <span className="muted small">נסגרה לכתיבה</span> : null}
-        </Link>
-      ))}
-    </div>
-  );
-}
-
-// התרחשות (לב ההתהוות): מה קורה בבית ואיך מצטרפים
-export default function Happenings() {
-  const { isHost, requireUser } = useAuth();
-  const intro = useContent('happeningsIntro');
-  const t = useT();
-  const KINDS = useHappeningKinds();
-  const items = visibleFor(useCollection('happenings'), isHost)?.sort(byNewest);
-  const [proposing, setProposing] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [kind, setKind] = useState('');
-  const present = KINDS.filter((k) => items?.some((h) => h.kind === k.key));
-  const shown = items?.filter((h) => !kind || h.kind === kind);
-
-  return (
-    <div className="page">
-      <PageHead spaceKey="happenings" lead={intro}>
-        <div className="row-start">
-          <button type="button" className="btn" onClick={() => requireUser() && setProposing(true)}>{t('happenings-suggest')}</button>
-          {isHost ? <button type="button" className="btn btn-ghost" onClick={() => setPublishing(true)}>פרסום התרחשות (מארחים)</button> : null}
-        </div>
-      </PageHead>
-
-      {publishing ? <div className="card"><HappeningForm onDone={() => setPublishing(false)} /></div> : null}
-
-      <section className="section">
-        {present.length > 1 ? (
-          <div className="chips kind-filter">
-            <button type="button" className={`chip ${kind ? '' : 'on'}`} onClick={() => setKind('')}>הכול</button>
-            {present.map((k) => <button key={k.key} type="button" className={`chip ${kind === k.key ? 'on' : ''}`} onClick={() => setKind(kind === k.key ? '' : k.key)}>{k.title}</button>)}
-          </div>
-        ) : null}
-        {shown == null ? <Loading /> : shown.length === 0 ? (
-          <Empty>עוד אין כאן התרחשויות. אולי הראשונה מחכה להצעה שלך?</Empty>
-        ) : <HappeningCards items={shown} />}
-      </section>
-
-      <StudyCircles />
-      <Paths keys={['categories', 'library', 'dreams']} />
-
-      <Modal open={proposing} onClose={() => setProposing(false)} title={t('happenings-suggest')} wide>
-        <HappeningForm key={proposing ? 'open' : 'closed'} propose onDone={() => setProposing(false)} />
-      </Modal>
-    </div>
+    <Link to={`/happenings/${h.id}`} className={`card happening-card kind-${h.kind} ${h.hidden ? 'is-hidden' : ''}`}>
+      <span className="badge">{kindOf(h.kind).title}</span>
+      <h3>{h.title}</h3>
+      <dl className="happening-meta">
+        {DETAILS.filter(([k]) => k !== 'link' && h[k]).map(([k, l]) => <div key={k}><dt>{l}</dt><dd>{h[k]}</dd></div>)}
+      </dl>
+      {h.kind === 'written' && h.closed ? <span className="muted small">נסגרה לכתיבה</span> : null}
+    </Link>
   );
 }
 
@@ -246,13 +116,14 @@ export function HappeningView() {
   useEffect(() => { setEditing(false); }, [id]);
 
   if (h === undefined) return <div className="page"><Loading /></div>;
-  if (h === null || (h.hidden && !isHost)) return <div className="page"><Empty>ההתרחשות לא נמצאה. <Link to="/happenings">חזרה</Link></Empty></div>;
+  if (h === null || (h.hidden && !isHost)) return <div className="page"><Empty>ההתרחשות לא נמצאה. <Link to="/categories">חזרה</Link></Empty></div>;
   const kind = kindOf(h.kind);
   const written = h.kind === 'written';
+  const home = h.spaces?.[0] ? `/categories/${h.spaces[0]}` : '/categories';
 
   return (
     <div className="page">
-      <Link to="/happenings" className="back">→ התרחשות</Link>
+      <Link to={home} className="back">→ {h.spaces?.[0] ? 'מרחב החיים' : 'מרחבי החיים'}</Link>
       {editing ? <div className="card"><HappeningForm initial={h} onDone={() => setEditing(false)} /></div> : (
         <article className={`reading ${h.hidden ? 'is-hidden' : ''}`}>
           <span className="badge">{kind.title}</span>
@@ -269,7 +140,7 @@ export function HappeningView() {
             <div className="row-start wrap host-actions">
               <button type="button" className="btn btn-small btn-ghost" onClick={() => setEditing(true)}>עריכה</button>
               {written ? <button type="button" className="btn btn-small btn-ghost" onClick={() => backend.update('happenings', id, { closed: !h.closed })}>{h.closed ? 'לפתוח שוב לכתיבה' : 'לסגור לכתיבה'}</button> : null}
-              <ItemActions col="happenings" item={h} onDeleted={() => navigate('/happenings')} />
+              <ItemActions col="happenings" item={h} onDeleted={() => navigate(home)} />
             </div>
           ) : null}
         </article>

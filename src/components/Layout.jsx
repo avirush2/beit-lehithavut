@@ -1,10 +1,9 @@
 import { Component, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { backend, isDemo } from '../lib/backend.js';
-import { useAuth, useCollection, useFeedbackTypes, useNavGroups, useSettings, useSpaces, useT } from '../lib/store.jsx';
+import { useAuth, useCollection, useNavGroups, useSettings, useSpaces, useT } from '../lib/store.jsx';
 import { harvestWindow } from '../lib/seasons.js';
 import { SITE } from '../content/defaults.js';
-import { Motif } from './Botanical.jsx';
 import SignIn from './SignIn.jsx';
 import IdeaButton, { openIdea } from './IdeaButton.jsx';
 
@@ -77,76 +76,58 @@ class PageBoundary extends Component {
   }
 }
 
-// מבנה הבית: כל לשונית עם הפריטים שלה – מרחבים (קישורים) או סוגי פנייה ב"יש לנו רעיון"
-export function useHouse() {
-  const spaces = useSpaces();
+// הלשונית שהעמוד הנוכחי שייך אליה: לפי הכתובת שלה ושל המרחבים שבה
+function useCurrentGroup() {
   const groups = useNavGroups();
-  const feedbackTypes = useFeedbackTypes();
-  return groups.map((g) => ({
-    ...g,
-    items: g.together
-      ? feedbackTypes.map((f) => ({ key: f.key, title: f.label, line: f.hint, tone: g.tone, open: () => openIdea(f.key) }))
-      : g.spaces.map((k) => spaces.find((s) => s.key === k)).filter(Boolean),
-  }));
+  const spaces = useSpaces();
+  const { pathname } = useLocation();
+  const paths = (g) => [g.to, ...g.spaces.flatMap((k) => {
+    const s = spaces.find((x) => x.key === k);
+    return s ? [s.to.split('#')[0], ...(s.also || [])] : [];
+  })];
+  return groups.find((g) => !g.together && paths(g).some((p) => pathname === p || pathname.startsWith(`${p}/`)));
 }
 
-const inSpace = (pathname, s) => [s.to, ...(s.also || [])].some((p) => pathname === p || pathname.startsWith(`${p}/`));
-
+// כל לשונית פותחת עמוד; "יחד בבית" פותח את חלון השיתוף
 function MainNav() {
-  const house = useHouse();
+  const groups = useNavGroups();
+  const current = useCurrentGroup();
   const t = useT();
-  const { pathname } = useLocation();
-  const [open, setOpen] = useState(null);
-  const ref = useRef(null);
-  useEffect(() => { setOpen(null); }, [pathname]);
-  useEffect(() => {
-    if (!open) return undefined;
-    const away = (e) => { if (!ref.current?.contains(e.target)) setOpen(null); };
-    const esc = (e) => { if (e.key === 'Escape') setOpen(null); };
-    document.addEventListener('mousedown', away);
-    document.addEventListener('keydown', esc);
-    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc); };
-  }, [open]);
-  const current = house.find((g) => g.items.some((s) => s.to && inSpace(pathname, s)));
-  const panel = house.find((g) => g.key === open);
-
   return (
-    <nav className="site-nav" aria-label="ניווט ראשי" ref={ref}>
+    <nav className="site-nav" aria-label="ניווט ראשי">
       <div className="nav-row">
         <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>{t('nav-home')}</NavLink>
-        {house.map((g) => (
-          <button key={g.key} type="button" aria-expanded={open === g.key}
-            className={`${current?.key === g.key ? 'active' : ''} ${open === g.key ? 'open' : ''}`}
-            onClick={() => setOpen(open === g.key ? null : g.key)}>
-            {g.title}<span className="caret" aria-hidden="true">⌄</span>
-          </button>
-        ))}
+        {groups.map((g) => (g.together
+          ? <button key={g.key} type="button" onClick={() => openIdea()}>{g.title}</button>
+          : <Link key={g.key} to={g.to} className={current?.key === g.key ? 'active' : ''}>{g.title}</Link>))}
       </div>
-      {panel ? (
-        <div className="nav-panel">
-          <p className="nav-panel-name">{panel.name}</p>
-          <div className="nav-items">
-            {panel.items.map((s) => (s.open ? (
-              <button key={s.key} type="button" className={`nav-item tone-${s.tone}`} onClick={() => { setOpen(null); s.open(); }}>
-                <strong>{s.title}</strong><span>{s.line}</span>
-              </button>
-            ) : (
-              <Link key={s.key} to={s.to} className={`nav-item tone-${s.tone} ${inSpace(pathname, s) ? 'here' : ''}`}>
-                <strong>{s.title}</strong><span>{s.line}</span>
-              </Link>
-            )))}
-          </div>
-        </div>
-      ) : null}
     </nav>
   );
+}
+
+// מעבר לעמוד – לראש העמוד; קישור עם # – לחלק המתאים (מחכים רגע שהתוכן ייטען)
+function useScrollOnNavigate() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) { window.scrollTo(0, 0); return undefined; }
+    const id = decodeURIComponent(hash.slice(1));
+    let tries = 0;
+    const timer = setInterval(() => {
+      const el = document.getElementById(id);
+      if (el || ++tries > 25) {
+        clearInterval(timer);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 80);
+    return () => clearInterval(timer);
+  }, [pathname, hash]);
 }
 
 export default function Layout() {
   const { user, name, isAdmin, isHost, openSignIn } = useAuth();
   const { pathname } = useLocation();
   const t = useT();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useScrollOnNavigate();
 
   return (
     <div className="app">
@@ -188,23 +169,5 @@ export default function Layout() {
       <MusicPlayer />
       <SignIn />
     </div>
-  );
-}
-
-// שבילים שיוצאים מכאן – הצעות, לא מסלול
-export function Paths({ keys, text = 'שבילים שיוצאים מכאן' }) {
-  const spaces = useSpaces();
-  return (
-    <nav className="paths" aria-label={text}>
-      <p className="muted small">{text}</p>
-      <div className="paths-list">
-        {keys.map((k) => spaces.find((s) => s.key === k)).filter(Boolean).map((s) => (
-          <Link key={s.key} to={s.to} className={`path-link tone-${s.tone}`}>
-            <Motif kind={s.motif} size={36} />
-            <span>{s.title}</span>
-          </Link>
-        ))}
-      </div>
-    </nav>
   );
 }

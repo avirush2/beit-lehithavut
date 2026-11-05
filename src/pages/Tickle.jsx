@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDecks, useSettings } from '../lib/store.jsx';
-import { Paths } from '../components/Layout.jsx';
-import { PageHead } from '../components/Botanical.jsx';
+import { useAuth, useCollection, useContent, useDecks, useSettings, useT } from '../lib/store.jsx';
+import { Prose } from '../components/ui.jsx';
 
+// הנבעת חלום: חלק בתוך עמוד החלימה, למי שהחלום עוד מחכה למילים
 export default function Tickle() {
   const { user, isHost, requireUser } = useAuth();
   const navigate = useNavigate();
   const intro = useContent('tickleIntro');
-  const deep = useContent('tickleDeep');
+  const t = useT();
   const settings = useSettings();
   const DECKS = useDecks();
   const cards = useCollection('cards') || [];
@@ -58,8 +58,11 @@ export default function Tickle() {
   };
 
   return (
-    <div className="page tickle">
-      <PageHead spaceKey="tickle" lead={intro} deep={deep} deepLabel="ומה אם אין לי חלום?" />
+    <section className="section tickle tone-sun" id="tickle">
+      <header className="section-head">
+        <h2>{t('tickle-title')}</h2>
+        <Prose text={intro} className="muted" />
+      </header>
 
       {settings.meditationUrl ? (
         <section className="card meditation">
@@ -107,8 +110,6 @@ export default function Tickle() {
           <button type="button" className="btn" onClick={toDraft}>לאסוף לטיוטת חלום</button>
         </section>
       ) : null}
-
-      <Paths keys={['dreams', 'threshold', 'observe']} />
-    </div>
+    </section>
   );
 }

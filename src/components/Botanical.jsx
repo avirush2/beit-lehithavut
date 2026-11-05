@@ -1,4 +1,5 @@
-import { useSpaces } from '../lib/store.jsx';
+import { Link } from 'react-router-dom';
+import { useContent, useNavGroups, useSpaces } from '../lib/store.jsx';
 import { Prose } from './ui.jsx';
 
 // איורים בוטניים קטנים, בקו יד: קו בצבע הגוון של המרחב, ומילוי בכתם צבעי מים עדין.
@@ -96,33 +97,45 @@ export function Sprig({ className = '' }) {
   );
 }
 
-// "להעמיק": שכבה שנייה למי שרוצה, בלי להעמיס על המסך
-export function Deeper({ text, label = 'להעמיק', children }) {
-  if (!text && !children) return null;
+// ראש עמוד של לשונית ראשית: דימוי, שם הלשונית והפתיח שלה – ומתחתיו לשוניות המשנה או קפיצה לחלקים
+export function GroupHead({ group, current, children }) {
+  const g = useNavGroups().find((x) => x.key === group);
+  const spaces = useSpaces();
+  const intro = useContent(g?.intro);
+  if (!g) return null;
+  const subs = g.spaces.map((k) => spaces.find((s) => s.key === k)).filter(Boolean);
+  const here = subs.find((s) => s.key === current) || subs[0];
   return (
-    <details className="deeper">
-      <summary>{label}</summary>
-      <div className="deeper-body">
-        <Prose text={text} />
-        {children}
-      </div>
-    </details>
+    <>
+      <header className={`page-head space-head tone-${here?.tone || g.tone}`}>
+        <Motif kind={here?.motif} size={72} className="head-motif" />
+        <div className="head-text">
+          <h1>{g.title}</h1>
+          {intro ? <Prose text={intro} className="lead" /> : null}
+          {children}
+        </div>
+      </header>
+      {subs.length > 1 ? (
+        <nav className={g.sub === 'tabs' ? 'sub-tabs' : 'sub-toc'} aria-label={g.title}>
+          {subs.map((s) => (
+            <Link key={s.key} to={s.to} className={`tone-${s.tone} ${g.sub === 'tabs' && s.key === current ? 'on' : ''}`}
+              aria-current={g.sub === 'tabs' && s.key === current ? 'page' : undefined}>{s.title}</Link>
+          ))}
+        </nav>
+      ) : null}
+    </>
   );
 }
 
-// ראש מרחב: דימוי, כותרת ומשפט אחד. את השאר – בשכבת ההעמקה.
-export function PageHead({ spaceKey, eyebrow, title, lead, deep, deepLabel, children }) {
+// כותרת של חלק בתוך עמוד מאוחד, עם עוגן לקפיצה
+export function SectionHead({ spaceKey, eyebrow, lead, children }) {
   const s = useSpaces().find((x) => x.key === spaceKey) || {};
   return (
-    <header className={`page-head space-head tone-${s.tone || 'sage'}`}>
-      <Motif kind={s.motif} size={72} className="head-motif" />
-      <div className="head-text">
-        <p className="eyebrow">{eyebrow ?? s.eyebrow}</p>
-        <h1>{title ?? s.title}</h1>
-        {lead ? <Prose text={lead} className="lead" /> : null}
-        <Deeper text={deep} label={deepLabel} />
-        {children}
-      </div>
+    <header className={`section-head tone-${s.tone || 'sage'}`}>
+      {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+      <h2>{s.title}</h2>
+      {lead ? <Prose text={lead} className="muted" /> : null}
+      {children}
     </header>
   );
 }

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useFeedbackTypes, useT } from '../lib/store.jsx';
+import { useAuth, useContent, useFeedbackTypes, useT } from '../lib/store.jsx';
 import { Modal } from './ui.jsx';
 
-// "יש לנו רעיון 🌱" – משוב, רעיונות ושותפות בפיתוח המרחב עצמו.
+// חלון "יחד בבית" – משוב, רעיונות ושותפות בפיתוח המרחב עצמו. נפתח מהלשונית ומתחתית העמוד.
 // פתוח לכולם, גם בלי הרשמה. הפניות נקראות רק בידי מארחים (ראו firestore.rules).
 
 // פתיחה מכל מקום באתר: openIdea('partner', 'טקסט פתיחה אופציונלי')
@@ -17,6 +17,7 @@ export default function IdeaButton() {
   const { pathname } = useLocation();
   const FEEDBACK_TYPES = useFeedbackTypes();
   const t = useT();
+  const together = useContent('mapTogether');
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('feedback');
   const [prompt, setPrompt] = useState('');
@@ -68,9 +69,6 @@ export default function IdeaButton() {
 
   return (
     <>
-      <button type="button" className="idea-fab" onClick={() => openIdea()}>
-        {t('idea-button')}
-      </button>
       <Modal open={open} onClose={close} title={t('idea-button')}>
         {state === 'sent' ? (
           <div className="idea-thanks">
@@ -83,6 +81,7 @@ export default function IdeaButton() {
           </div>
         ) : (
           <form onSubmit={send} className="idea-form">
+            {together ? <p>{together}</p> : null}
             <p className="muted small">{t('idea-intro')}</p>
             <div className="chips" role="radiogroup" aria-label="סוג הפנייה">
               {FEEDBACK_TYPES.map((t) => (

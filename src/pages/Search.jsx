@@ -11,7 +11,7 @@ const SOURCES = [
   ['stories', 'חגיגה והשראה', (x) => x.title, (x) => x.body, () => '/celebrate'],
   ['pain', 'שיתוף קושי', () => '', (x) => x.body, (x) => `/threshold/${x.id}`],
   ['voices', 'התבוננות', () => '', (x) => [x.dissolving, x.emerging].filter(Boolean).join(' · '), () => '/observe'],
-  ['studyCircles', 'קבוצת למידה', (x) => x.topic, (x) => x.description, () => '/happenings'],
+  ['studyCircles', 'קבוצת למידה', (x) => x.topic, (x) => x.description, () => '/library#circles'],
 ];
 
 const cut = (s, n = 200) => (s && s.length > n ? `${s.slice(0, n)}…` : s || '');

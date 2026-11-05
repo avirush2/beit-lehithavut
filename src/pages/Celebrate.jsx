@@ -7,8 +7,7 @@ function usePrompts() {
   return t('celebrate-prompts').split('\n').map((p) => p.trim()).filter(Boolean);
 }
 import Comments from '../components/Comments.jsx';
-import { Paths } from '../components/Layout.jsx';
-import { PageHead } from '../components/Botanical.jsx';
+import { GroupHead } from '../components/Botanical.jsx';
 import { Byline, Empty, ItemActions, LifeSpacePicker, Loading, Prose, SpaceBadges } from '../components/ui.jsx';
 
 // חגיגה והשראה מההווה: המבט אל מה שכבר צומח. לא גלריה שמוצגת מלמעלה – מקום שכולם מוסיפים אליו.
@@ -66,7 +65,6 @@ function GideiBayit() {
 export default function Celebrate() {
   const { isHost, requireUser } = useAuth();
   const intro = useContent('celebrateIntro');
-  const deep = useContent('celebrateDeep');
   const KINDS = useStoryKinds();
   const PROMPTS = usePrompts();
   const t = useT();
@@ -79,9 +77,9 @@ export default function Celebrate() {
 
   return (
     <div className="page">
-      <PageHead spaceKey="celebrate" lead={intro} deep={deep}>
-        <ul className="prompts">{PROMPTS.map((p) => <li key={p}>{p}</li>)}</ul>
-      </PageHead>
+      <GroupHead group="sensing" current="celebrate" />
+      <Prose text={intro} className="sub-lead" />
+      <ul className="prompts">{PROMPTS.map((p) => <li key={p}>{p}</li>)}</ul>
 
       <div className="tabs" role="tablist">
         {KINDS.map((k) => (
@@ -115,7 +113,6 @@ export default function Celebrate() {
           </div>
         )}
       </section>
-      <Paths keys={['categories', 'observe', 'dreams']} />
     </div>
   );
 }

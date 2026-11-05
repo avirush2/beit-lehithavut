@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useCollection, useContent, useSprings, useT, byOrder } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
-import { Paths } from '../components/Layout.jsx';
-import { PageHead } from '../components/Botanical.jsx';
+import { GroupHead } from '../components/Botanical.jsx';
 import { openIdea } from '../components/IdeaButton.jsx';
+import StudyCircles from './StudyCircles.jsx';
 import { Empty, Loading, Prose, SpaceBadges, useLifeSpaces } from '../components/ui.jsx';
 
 export function ReadingList({ items }) {
@@ -25,10 +26,9 @@ export function ReadingList({ items }) {
   );
 }
 
-// ספריה (לב ההתהוות): מקורות להעמקה. הסינון הראשי – לפי מרחב חיים; המעיינות – סינון משני.
+// התהוות ← ספריה: מקורות להעמקה וקבוצות למידה. הסינון הראשי – לפי מרחב חיים; המעיינות – סינון משני.
 export default function Library() {
   const intro = useContent('depthIntro');
-  const deep = useContent('depthDeep');
   const assumptions = useContent('assumptions');
   const t = useT();
   const readings = useCollection('readings')?.slice().sort(byOrder);
@@ -40,9 +40,12 @@ export default function Library() {
 
   return (
     <div className="page">
-      <PageHead spaceKey="library" lead={intro} deep={deep}>
+      <GroupHead group="becoming" current="library" />
+      <Prose text={intro} className="sub-lead" />
+      <div className="row-start">
         <button type="button" className="btn" onClick={() => openIdea('idea', t('library-suggest-prompt'))}>{t('library-suggest')}</button>
-      </PageHead>
+        <Link to="/library#circles" className="btn btn-ghost">{t('happenings-circles')}</Link>
+      </div>
 
       <section className="section">
         <div className="filters">
@@ -71,11 +74,12 @@ export default function Library() {
         <Prose text={assumptions} />
       </details>
 
+      <StudyCircles />
+
       <section className="section">
         <h2>שיחה על מהות השינוי</h2>
         <Comments targetType="depth" targetId="library" placeholder="מחשבה על השינוי שמתקיים עכשיו, או מקור שכדאי להכיר" />
       </section>
-      <Paths keys={['categories', 'happenings', 'compass']} />
     </div>
   );
 }

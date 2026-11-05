@@ -4,13 +4,11 @@ import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useDoc, useT, byNewest, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
 import { Byline, Empty, ItemActions, LifeSpacePicker, Loading, Prose, SpaceBadges } from '../components/ui.jsx';
-import { PageHead } from '../components/Botanical.jsx';
-import { Paths } from '../components/Layout.jsx';
+import { GroupHead } from '../components/Botanical.jsx';
 
 export function ThresholdPage() {
   const { isHost, requireUser, stamp } = useAuth();
   const intro = useContent('painIntro');
-  const deep = useContent('painDeep');
   const t = useT();
   const posts = visibleFor(useCollection('pain'), isHost)?.sort(byNewest);
   const [body, setBody] = useState('');
@@ -25,7 +23,8 @@ export function ThresholdPage() {
 
   return (
     <div className="page threshold">
-      <PageHead spaceKey="threshold" lead={intro} deep={deep} />
+      <GroupHead group="sensing" current="threshold" />
+      <Prose text={intro} className="sub-lead" />
       <form className="card form" onSubmit={submit}>
         <textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder={t('pain-placeholder')} />
         <LifeSpacePicker key={posts?.length} value={spaces} onChange={setSpaces} collapsible />
@@ -40,7 +39,6 @@ export function ThresholdPage() {
           </Link>
         ))}
       </section>
-      <Paths keys={['observe', 'tickle', 'celebrate']} />
     </div>
   );
 }
@@ -70,7 +68,7 @@ export function ThresholdPost() {
         <Comments targetType="pain" targetId={id} prompt={PROMPT} placeholder={PROMPT} />
       </section>
       <div className="card turn-to-dream">
-        <p>ואם מתוך הכאב הזה מבקש לצמוח חלום – אפשר לשתול אותו בגן.</p>
+        <p>ואם מתוך הכאב הזה מבקש לצמוח חלום – אפשר לשתף אותו בחלימה.</p>
         <button type="button" className="btn btn-ghost" onClick={() => requireUser() && navigate('/dreams/new', { state: { draft: '', fromPain: id } })}>להפוך לזרע חלום</button>
       </div>
     </div>
