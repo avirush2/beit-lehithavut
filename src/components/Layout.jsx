@@ -51,9 +51,11 @@ function MusicPlayer() {
   );
 }
 
+// הקצירים מוסתרים עד שיופעלו בהגדרות
 export function HarvestBanner() {
+  const settings = useSettings();
   const h = harvestWindow();
-  if (!h) return null;
+  if (!h || !settings.showHarvests) return null;
   return (
     <div className="harvest-banner">
       <strong>{h.label}</strong>

@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useT, byNewest, visibleFor } from '../lib/store.jsx';
 import { GroupHead } from '../components/Botanical.jsx';
-import { ItemActions, LifeSpacePicker, Prose, SpaceBadges } from '../components/ui.jsx';
+import { ItemActions, LifeSpacePicker, SpaceBadges } from '../components/ui.jsx';
 
-// חישה ← התבוננות: שאלות על התקופה, וקולות קצרים – מה מתמוסס ומה מבקש להתהוות
+// חישה ← התבוננות: הזמנה אחת שזורמת – מה מתמוסס עכשיו, ומה מבקש להתהוות – וקולות קצרים שמצטרפים לתמונה
 function Voices() {
   const { isHost, requireUser, stamp } = useAuth();
-  const intro = useContent('voicesIntro');
+  const lead = useContent('observeIntro');
+  const after = useContent('voicesIntro');
   const t = useT();
   const items = visibleFor(useCollection('voices'), isHost)?.sort(byNewest).slice(0, 24);
   const [dissolving, setDissolving] = useState('');
@@ -28,18 +29,22 @@ function Voices() {
 
   return (
     <section className="section">
-      <h2>{t('voices-title')}</h2>
-      <p className="muted">{intro}</p>
-      <form className="voices-form" onSubmit={submit}>
-        <label className="field"><span className="field-label">מה מתמוסס</span>
-          <input value={dissolving} onChange={(e) => setDissolving(e.target.value)} maxLength={200} />
-        </label>
-        <label className="field"><span className="field-label">מה מבקש להתהוות</span>
-          <input value={emerging} onChange={(e) => setEmerging(e.target.value)} maxLength={200} />
-        </label>
-        <button className="btn" disabled={busy}>להוסיף קול</button>
+      <form className="observe" onSubmit={submit}>
+        <p className="observe-lead">{lead}</p>
+        <div className="observe-pair">
+          <label className="observe-half dissolving">
+            <span className="observe-q">{t('voices-dissolving')}</span>
+            <textarea rows={3} value={dissolving} onChange={(e) => setDissolving(e.target.value)} maxLength={200} />
+          </label>
+          <label className="observe-half emerging">
+            <span className="observe-q">{t('voices-emerging')}</span>
+            <textarea rows={3} value={emerging} onChange={(e) => setEmerging(e.target.value)} maxLength={200} />
+          </label>
+        </div>
+        <p className="observe-after">{after}</p>
+        <LifeSpacePicker key={sent} value={spaces} onChange={setSpaces} collapsible />
+        <div className="row-end"><button className="btn" disabled={busy || !(dissolving.trim() || emerging.trim())}>להוסיף קול</button></div>
       </form>
-      <div className="voices-spaces"><LifeSpacePicker key={sent} value={spaces} onChange={setSpaces} collapsible /></div>
       {items?.length ? (
         <ul className="voices">
           {items.map((v) => (
@@ -60,17 +65,9 @@ function Voices() {
 }
 
 export default function Observe() {
-  const intro = useContent('observeIntro');
-  const questions = useContent('timingQuestions');
-  const list = String(questions || '').split('\n').map((q) => q.trim()).filter(Boolean);
-
   return (
     <div className="page">
       <GroupHead group="sensing" current="observe" />
-      <Prose text={intro} className="sub-lead" />
-      <ul className="ponder">
-        {list.map((q) => <li key={q}>{q}</li>)}
-      </ul>
       <Voices />
     </div>
   );

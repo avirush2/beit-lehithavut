@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDoc, useIdeaKinds, useLenses, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useDoc, useIdeaKinds, useLenses, useSettings, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
 
 function useKind() {
   const kinds = useIdeaKinds();
@@ -15,7 +15,7 @@ import { GroupHead } from '../components/Botanical.jsx';
 import { HappeningCard, HappeningForm } from './Happenings.jsx';
 import { ReadingList } from './Library.jsx';
 import {
-  Byline, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Modal, Prose, authorOf, formatDate,
+  Byline, CompassBadges, Empty, ItemActions, Loading, Modal, Prose, authorOf, formatDate,
 } from '../components/ui.jsx';
 
 // כמה צומח בכל מרחב: רעיונות, שאלות והתרחשויות שתויגו בו
@@ -72,7 +72,7 @@ function IdeaForm({ categoryId, idea, initialKind, onDone }) {
   const [kind, setKind] = useState(idea?.kind || initialKind || 'idea');
   const [title, setTitle] = useState(idea?.title || '');
   const [body, setBody] = useState(idea?.body || '');
-  const [compass, setCompass] = useState(idea?.compass || []);
+  const compass = idea?.compass || []; // בחירת המצפן הוסרה מהטופס; מה שכבר נבחר נשמר
   const ALL_KINDS = useIdeaKinds();
   // "התנסות או יוזמה" עבר לטופס ההתרחשות – מוצג רק כשעורכים משהו שכבר נכתב כך
   const IDEA_KINDS = ALL_KINDS.filter((x) => !x.retired || x.key === idea?.kind);
@@ -99,7 +99,6 @@ function IdeaForm({ categoryId, idea, initialKind, onDone }) {
       <label className="field"><span className="field-label">פירוט</span>
         <textarea rows={6} value={body} onChange={(e) => setBody(e.target.value)} placeholder={k.placeholder} />
       </label>
-      <div className="field"><span className="field-label">נוגע במצפן? (לא חובה)</span><CompassPicker value={compass} onChange={setCompass} /></div>
       <div className="row-end">
         <button type="button" className="btn btn-ghost" onClick={onDone}>ביטול</button>
         <button className="btn" disabled={!title.trim()}>{idea ? 'שמירה' : 'לשתף'}</button>
@@ -201,6 +200,7 @@ export function CategoryView() {
   const [proposing, setProposing] = useState(false);
   const ideaKind = useKind();
   const kinds = useIdeaKinds().filter((k) => !k.retired);
+  const settings = useSettings();
   const t = useT();
   useEffect(() => { if (share) setAdding(share); }, [share]);
 
@@ -261,7 +261,7 @@ export function CategoryView() {
         )}
       </section>
       <Related id={id} />
-      <Harvests category={category} />
+      {settings.showHarvests ? <Harvests category={category} /> : null}
       <Modal open={proposing} onClose={() => setProposing(false)} title={t('happenings-suggest')} wide>
         <HappeningForm key={proposing ? 'open' : 'closed'} propose={!isHost} initial={{ spaces: [id] }} onDone={() => setProposing(false)} />
       </Modal>

@@ -21,9 +21,8 @@ const TEXTS = [
   ['depthIntro', 'התהוות ← ספריה – פתיח קצר'],
   ['assumptions', 'התהוות ← ספריה – נקודות הנחה'],
   ['mapSensing', 'חישה – פתיח העמוד'],
-  ['observeIntro', 'חישה ← התבוננות – פתיח'],
-  ['timingQuestions', 'חישה ← התבוננות – שאלות (שאלה בכל שורה)'],
-  ['voicesIntro', 'חישה ← התבוננות – הזמנה ל"קולות מהתפר"'],
+  ['observeIntro', 'חישה ← התבוננות – תחילת ההזמנה (לפני השאלות; השאלות עצמן ב"תוויות" ← התבוננות)'],
+  ['voicesIntro', 'חישה ← התבוננות – סוף ההזמנה (אחרי השאלות)'],
   ['painIntro', 'חישה ← שיתוף קושי – פתיח קצר'],
   ['celebrateIntro', 'חישה ← חגיגה והשראה – פתיח קצר'],
   ['gideiBayit', 'חישה ← חגיגה והשראה – כרטיס גידולי בית'],
@@ -259,6 +258,10 @@ function Settings() {
       <label className="field check-row">
         <input type="checkbox" checked={!!s.showGrowing} onChange={(e) => setS({ ...s, showGrowing: e.target.checked })} />
         <span>להציג בשער הכניסה את "מה צומח עכשיו" – ארבעת השיתופים האחרונים</span>
+      </label>
+      <label className="field check-row">
+        <input type="checkbox" checked={!!s.showHarvests} onChange={(e) => setS({ ...s, showHarvests: e.target.checked })} />
+        <span>להציג את הקצירים העונתיים במרחבי החיים (ואת ההודעה על הקציר הקרוב)</span>
       </label>
       <p className="hint">חשוב: רק מוזיקה שלך או ברישיון שימוש חופשי.</p>
       <div className="row-end">{status ? <span className="notice inline">{status}</span> : null}

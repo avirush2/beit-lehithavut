@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDoc, useDreamLayers, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useDoc, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
 import { GroupHead, SectionHead } from '../components/Botanical.jsx';
 import GardenScene from '../components/GardenScene.jsx';
@@ -27,17 +27,11 @@ function DreamCards({ dreams }) {
 
 // עמוד החלימה: שיתוף חלום, ומתחתיו הנבעת חלום. (גן החלומות מוסתר כרגע – החלומות מוצגים כרשימה.)
 export function DreamsPage() {
-  const { user, isHost, requireUser } = useAuth();
+  const { isHost, requireUser } = useAuth();
   const navigate = useNavigate();
   const intro = useContent('dreamsIntro');
   const dreams = visibleFor(useCollection('dreams'), isHost)?.sort(byNewest);
-  const LAYERS = useDreamLayers();
   const t = useT();
-  const [params, setParams] = useSearchParams();
-  const view = LAYERS.some((l) => l.key === params.get('layer')) ? params.get('layer') : LAYERS[0].key;
-  const setView = (key) => setParams(key === LAYERS[0].key ? {} : { layer: key }, { replace: true });
-  const layer = LAYERS.find((l) => l.key === view);
-  const mine = user ? (dreams || []).filter((d) => d.uid === user.uid) : [];
 
   return (
     <div className="page">
@@ -48,26 +42,10 @@ export function DreamsPage() {
 
       <section className="section" id="dreams">
         <SectionHead spaceKey="dreams" lead={intro}>
-          <div className="row-start">
-            <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
-            <Link to="/dreams#tickle" className="btn btn-ghost">{t('dreams-nodream')}</Link>
-          </div>
+          <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
         </SectionHead>
 
-      <div className="tabs" role="tablist" aria-label="שכבות החלום">
-        {LAYERS.map((l) => (
-          <button key={l.key} type="button" role="tab" aria-selected={view === l.key} className={view === l.key ? 'on' : ''} onClick={() => setView(l.key)}>{l.title}</button>
-        ))}
-      </div>
-      <p className="layer-question">{layer.question}</p>
-
-      {dreams == null ? <Loading /> : view === 'mine' ? (
-        !user ? (
-          <Empty>כאן נאספים החלומות שלך. <button type="button" className="link-btn" onClick={() => requireUser()}>כניסה</button> – ואז אפשר להתחיל לכתוב.</Empty>
-        ) : mine.length === 0 ? (
-          <Empty>עוד לא כתבת כאן חלום. אפשר להתחיל ממשפט אחד – או לשלוף קלף ב<Link to="/dreams#tickle">הנבעת חלום</Link>.</Empty>
-        ) : <DreamCards dreams={mine} />
-      ) : dreams.length === 0 ? (
+      {dreams == null ? <Loading /> : dreams.length === 0 ? (
         <Empty>עוד אין כאן חלומות. הניצוץ הראשון מחכה.</Empty>
       ) : <DreamCards dreams={dreams} />}
       </section>
