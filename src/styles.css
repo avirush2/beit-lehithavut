@@ -263,11 +263,10 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .gate-text p:last-child { margin-bottom: 0; }
 /* קישור בתוך טקסט: [מילים](/כתובת) */
 .text-link {
-  display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--blossom-ink); cursor: pointer;
-  text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--blossom-ink) 40%, transparent);
-  text-decoration-thickness: 1.5px; text-underline-offset: 4px; transition: text-decoration-color .15s;
+  display: inline; padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: inherit; cursor: pointer;
+  text-decoration: none; text-underline-offset: 4px;
 }
-.text-link:hover { text-decoration-color: currentColor; }
+.text-link:hover, .text-link:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; }
 .gate-scene { display: block; width: 100%; height: clamp(150px, 20vw, 260px); margin-top: 1rem; }
 .center { text-align: center; }
 
