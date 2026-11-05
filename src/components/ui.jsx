@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, byOrder } from '../lib/store.jsx';
+import { useAuth, useCollection, useT, byOrder } from '../lib/store.jsx';
 import { Link, useLocation } from 'react-router-dom';
 
 export function formatDate(ms) {
@@ -8,13 +8,37 @@ export function formatDate(ms) {
   return new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// קישור בתוך טקסט: [מילים](/כתובת). כתובת שמתחילה ב-/ נשארת באתר; (/together) פותח את חלון "יחד בבית".
+// מילה שפותחת חלון קטן עם הערה: [ישן](?old) – הטקסט נערך בניהול ← תוויות ← "הערות קטנות" (note-old)
+function NoteLink({ label, name }) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const away = (e) => { if (!ref.current?.contains(e.target)) setOpen(false); };
+    const esc = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', away);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  const note = t(`note-${name}`);
+  if (!note) return label;
+  return (
+    <span className="note-wrap" ref={ref}>
+      <button type="button" className="text-link" aria-expanded={open} onClick={() => setOpen(!open)}>{label}</button>
+      {open ? <span className="note-pop" role="note">{note}</span> : null}
+    </span>
+  );
+}
+
+// קישור בתוך טקסט: [מילים](/כתובת). כתובת שמתחילה ב-/ נשארת באתר; (/together) פותח את חלון "יחד בבית"; (?שם) – הערה קטנה.
 function Inline({ text }) {
-  const parts = String(text).split(/(\[[^\]]+\]\((?:\/[^)\s]*|https?:\/\/[^)\s]+)\))/g);
+  const parts = String(text).split(/(\[[^\]]+\]\((?:\/[^)\s]*|\?[\w-]+|https?:\/\/[^)\s]+)\))/g);
   return parts.map((part, i) => {
     const m = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
     if (!m) return part;
     const [, label, to] = m;
+    if (to.startsWith('?')) return <NoteLink key={i} label={label} name={to.slice(1)} />;
     if (to === '/together') {
       const open = () => window.dispatchEvent(new CustomEvent('open-idea', { detail: { type: 'feedback' } }));
       return <button key={i} type="button" className="text-link" onClick={open}>{label}</button>;
