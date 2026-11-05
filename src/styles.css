@@ -114,18 +114,36 @@ button { font: inherit; cursor: pointer; }
 .hello { color: var(--muted); }
 
 .site-nav {
-  display: flex; gap: .3rem; overflow-x: auto; scrollbar-width: none;
   padding: .3rem clamp(16px, 4vw, 48px) .6rem;
   border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: 20; background: var(--bg);
 }
-.site-nav::-webkit-scrollbar { display: none; }
-.site-nav a {
-  white-space: nowrap; text-decoration: none; color: var(--muted);
-  font-family: var(--label); font-size: .85rem; padding: .35em .8em; border-radius: 99px;
+.nav-row { display: flex; flex-wrap: wrap; gap: .3rem; }
+.nav-row > a, .nav-row > button {
+  white-space: nowrap; text-decoration: none; color: var(--muted); background: none; border: 0;
+  font-family: var(--label); font-size: .88rem; padding: .35em .85em; border-radius: 99px;
 }
-.site-nav a:hover { color: var(--fg); background: var(--bg-deep); }
-.site-nav a.active { color: var(--forest-fg); background: var(--forest); }
+.nav-row > a:hover, .nav-row > button:hover, .nav-row > button.open { color: var(--fg); background: var(--bg-deep); }
+.nav-row > a.active, .nav-row > button.active { color: var(--forest-fg); background: var(--forest); }
+.caret { display: inline-block; margin-inline-start: .35em; font-size: .85em; transform: translateY(-.15em); transition: transform .15s; }
+button.open .caret { transform: translateY(.1em) rotate(180deg); }
+.nav-panel { max-width: 980px; margin: .6rem auto .2rem; }
+.nav-panel-name { font-family: "Amatic SC", var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1; color: var(--blossom-ink); margin: 0 0 .4rem; }
+.nav-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .6rem; }
+.nav-item {
+  display: block; text-align: start; padding: .7rem .9rem; border-radius: var(--radius); color: var(--fg); text-decoration: none;
+  background: color-mix(in srgb, var(--tone) 28%, var(--surface)); border: 1px solid color-mix(in srgb, var(--tone) 55%, var(--line));
+}
+.nav-item:hover, .nav-item.here { border-color: var(--tone-ink, var(--moss)); }
+.nav-item strong { display: block; font-family: var(--display); font-size: 1.15rem; font-weight: 500; }
+.nav-item span { display: block; font-size: .85rem; color: var(--muted); }
+@media (max-width: 600px) {
+  .nav-row { justify-content: center; gap: .15rem; }
+  .nav-row > a, .nav-row > button { padding: .35em .45em; font-size: .82rem; }
+  .caret { margin-inline-start: .2em; }
+  .nav-items { grid-template-columns: 1fr; }
+  .nav-panel { max-height: 70vh; overflow-y: auto; }
+}
 
 .main { flex: 1; }
 .page { max-width: 980px; margin: 0 auto; padding: 2rem clamp(16px, 4vw, 40px) 3rem; }
@@ -249,35 +267,46 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
   background: radial-gradient(60% 90% at 70% 10%, color-mix(in srgb, var(--blossom) 45%, transparent), transparent 70%), radial-gradient(40% 70% at 20% 20%, color-mix(in srgb, var(--sun) 35%, transparent), transparent 70%); }
 .space-scene .garden-scene { width: 100%; height: 100%; display: block; }
 
-/* פסים: שקט וחגיגי לסירוגין */
-.band-sparks {
-  text-align: center;
+/* מפת ההתמצאות: כנף – לב – כנף, ומתחת שתי רגליים */
+.house-map { max-width: 1040px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); }
+.house-intro { font-family: var(--display); font-size: clamp(1.35rem, 3vw, 1.9rem); text-align: center; max-width: 26em; margin: 0 auto 1.6rem; }
+.house {
+  display: grid; gap: 1rem; grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-areas: "dreaming dreaming becoming becoming sensing sensing" ". about about together together .";
+}
+.house-part {
+  display: flex; flex-direction: column; padding: 1.2rem 1.3rem; border-radius: var(--organic);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--tone) 40%, var(--surface)), var(--surface) 70%);
+  border: 1px solid color-mix(in srgb, var(--tone) 60%, var(--line));
+}
+.house-part p { flex: 1; margin-bottom: .8rem; }
+.house-part .hand { color: var(--tone-ink, var(--blossom-ink)); }
+.part-dreaming { grid-area: dreaming; }
+.part-sensing { grid-area: sensing; }
+.part-about { grid-area: about; }
+.part-together { grid-area: together; }
+.part-becoming {
+  grid-area: becoming;
   background:
-    radial-gradient(40% 80% at 10% 50%, color-mix(in srgb, var(--sun) 45%, transparent), transparent 70%),
-    radial-gradient(40% 80% at 90% 40%, color-mix(in srgb, var(--turquoise) 45%, transparent), transparent 70%),
-    color-mix(in srgb, var(--lilac) 30%, var(--bg));
+    radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--sun) 40%, transparent), transparent 70%),
+    linear-gradient(165deg, color-mix(in srgb, var(--tone) 65%, var(--surface)), var(--surface) 80%);
 }
-.sparks-text { max-width: 40em; margin: 0 auto; }
-.sparks-text p { font-family: var(--display); font-size: clamp(1.2rem, 2.4vw, 1.5rem); line-height: 1.6; max-width: none; }
-.band-festive {
-  background:
-    radial-gradient(50% 90% at 85% 20%, color-mix(in srgb, var(--peach) 60%, transparent), transparent 70%),
-    radial-gradient(45% 90% at 10% 80%, color-mix(in srgb, var(--blossom) 50%, transparent), transparent 70%),
-    color-mix(in srgb, var(--sun) 35%, var(--bg));
+.check-row { display: flex; align-items: center; gap: .6rem; margin: .4rem 0 .9rem; }
+.check-row input { width: auto; }
+.about-text p { font-size: 1.08rem; }
+.house-links { display: flex; flex-wrap: wrap; gap: .4rem; }
+.house-link {
+  border: 1px solid color-mix(in srgb, var(--tone-ink, var(--moss)) 35%, transparent); background: var(--surface); color: var(--fg);
+  padding: .3em .9em; border-radius: 99px; font-size: .9rem; text-decoration: none;
 }
-.invite-text { font-family: var(--display); font-size: clamp(1.25rem, 2.6vw, 1.6rem); line-height: 1.5; max-width: 32em; }
-.ways { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
-.way {
-  border: 0; padding: .55em 1.1em; border-radius: 99px; font-size: .98rem; color: var(--fg);
-  background: color-mix(in srgb, var(--tone) 75%, var(--surface)); box-shadow: 0 6px 16px -12px rgba(0, 0, 0, .5); transition: transform .2s;
+.house-link:hover { border-color: var(--tone-ink, var(--moss)); }
+@media (max-width: 860px) {
+  .house { grid-template-columns: 1fr; grid-template-areas: "dreaming" "sensing" "becoming" "about" "together"; }
 }
-.way:hover { transform: translateY(-2px); }
 .btn-bloom { background: var(--blossom-ink); border-color: var(--blossom-ink); color: #fff; }
 .badge.kind-question { background: color-mix(in srgb, var(--sky) 60%, var(--surface)); color: var(--fg); }
 .badge.kind-experiment { background: color-mix(in srgb, var(--sage) 70%, var(--surface)); color: var(--fg); }
 .home { overflow-x: clip; }
-.paths-home, .home .open-question { max-width: 1040px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); }
-.paths-home h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); }
 .band { padding: 3rem clamp(16px, 4vw, 40px); }
 .band-soft { background: radial-gradient(70% 120% at 85% 0%, color-mix(in srgb, var(--lilac) 40%, transparent), transparent 70%), color-mix(in srgb, var(--sage) 22%, var(--bg)); }
 
@@ -340,26 +369,6 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
   background: color-mix(in srgb, var(--pollen) 16%, var(--surface)); border: 1px solid var(--pollen); font-size: .95rem;
 }
 .page .harvest-banner { margin-inline: 0; }
-.doors { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: dense; gap: 1.1rem; margin-top: 1rem; }
-.door {
-  position: relative; display: block; padding: 1.3rem 1.3rem 1.2rem; border-radius: var(--organic);
-  background: linear-gradient(165deg, color-mix(in srgb, var(--tone) 42%, var(--surface)), var(--surface) 62%);
-  border: 1px solid color-mix(in srgb, var(--tone) 60%, var(--line)); color: inherit; text-decoration: none; transition: transform .2s;
-}
-.door:nth-child(even) { border-radius: 30px 22px 34px 24px / 22px 30px 24px 32px; }
-.door:hover { transform: translateY(-3px); }
-.door.big {
-  grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 1.8rem;
-  background:
-    radial-gradient(60% 60% at 75% 25%, color-mix(in srgb, var(--sun) 55%, transparent), transparent 70%),
-    linear-gradient(160deg, color-mix(in srgb, var(--tone) 75%, var(--surface)), color-mix(in srgb, var(--lilac) 35%, var(--surface)));
-}
-.door.big h3 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); }
-.door.big p { font-size: 1.05rem; color: var(--fg); }
-.door.wide { grid-column: span 2; }
-.door h3 { margin-top: .4rem; }
-.door p { color: var(--muted); font-size: .95rem; margin: 0; }
-.open-question { text-align: center; padding: 2rem 1rem; }
 .question { font-family: var(--display); font-size: clamp(1.3rem, 3vw, 1.9rem); max-width: 30em; margin: 0 auto 1.2rem; }
 
 /* reading */
@@ -572,14 +581,7 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
   .deck { min-height: 150px; }
   .space-head { padding: 1rem .6rem; gap: .8rem; }
   .head-motif { width: 52px; height: 52px; }
-  .doors { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .door { padding: 1rem; }
-  .door.big { grid-column: span 2; grid-row: auto; min-height: 210px; }
-  .door.wide { grid-column: span 2; }
   .space-scene { height: 90px; }
-}
-@media (min-width: 761px) and (max-width: 1000px) {
-  .doors { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

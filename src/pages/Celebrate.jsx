@@ -112,7 +112,7 @@ export default function Celebrate() {
           </div>
         )}
       </section>
-      <Paths keys={['categories', 'dreams', 'timing']} />
+      <Paths keys={['categories', 'observe', 'dreams']} />
     </div>
   );
 }

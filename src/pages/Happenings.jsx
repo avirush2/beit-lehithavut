@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useSprings, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
+import { useAuth, useCollection, useContent, useSprings, useT, byNewest, visibleFor } from '../lib/store.jsx';
 import { STUDY_TOPICS } from '../content/defaults.js';
-import Comments from '../components/Comments.jsx';
 import { Paths } from '../components/Layout.jsx';
-import { Motif, PageHead } from '../components/Botanical.jsx';
-import { Chips, Empty, ItemActions, Prose } from '../components/ui.jsx';
+import { PageHead } from '../components/Botanical.jsx';
+import { openIdea } from '../components/IdeaButton.jsx';
+import { Chips, ItemActions } from '../components/ui.jsx';
 
 const MODES = ['לבד', 'בצמד', 'בחבורה'];
 
 function StudyCircles() {
   const { user, isHost, requireUser, stamp, name } = useAuth();
+  const t = useT();
   const circles = visibleFor(useCollection('studyCircles'), isHost)?.sort(byNewest);
   const [open, setOpen] = useState(false);
   const [topic, setTopic] = useState('');
@@ -40,13 +41,13 @@ function StudyCircles() {
 
   return (
     <section className="section">
-      <h2>חבורות לימוד</h2>
+      <h2>{t('happenings-circles')}</h2>
       <p className="muted">בוחרים נושא, מעיין השראה ואופן למידה. מי שמרגיש.ה משיכה – מצטרפ.ת.</p>
       {open ? (
         <form className="card form" onSubmit={create}>
           <label className="field"><span className="field-label">נושא המחקר</span>
             <input list="study-topics" value={topic} onChange={(e) => setTopic(e.target.value)} required />
-            <datalist id="study-topics">{STUDY_TOPICS.map((t) => <option key={t} value={t} />)}</datalist>
+            <datalist id="study-topics">{STUDY_TOPICS.map((x) => <option key={x} value={x} />)}</datalist>
           </label>
           <div className="field"><span className="field-label">מעיין ההשראה</span>
             <Chips options={SPRINGS.map((s) => s.title)} value={spring} onChange={setSpring} single />
@@ -55,9 +56,9 @@ function StudyCircles() {
           <label className="field"><span className="field-label">כמה מילים על הכוונה</span>
             <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="להתבונן, לשהות, להקשיב, ליצור, לחקור, לנוע…" />
           </label>
-          <div className="row-end"><button type="button" className="btn btn-ghost" onClick={() => setOpen(false)}>ביטול</button><button className="btn">פתיחת חבורה</button></div>
+          <div className="row-end"><button type="button" className="btn btn-ghost" onClick={() => setOpen(false)}>ביטול</button><button className="btn">פתיחת קבוצה</button></div>
         </form>
-      ) : <button type="button" className="btn" onClick={() => requireUser() && setOpen(true)}>לפתוח נושא למחקר</button>}
+      ) : <button type="button" className="btn btn-ghost" onClick={() => requireUser() && setOpen(true)}>לפתוח נושא למחקר</button>}
 
       {circles?.length ? (
         <div className="grid">
@@ -85,57 +86,17 @@ function StudyCircles() {
   );
 }
 
-export default function Depth() {
-  const intro = useContent('depthIntro');
-  const deep = useContent('depthDeep');
-  const assumptions = useContent('assumptions');
-  const readings = useCollection('readings')?.slice().sort(byOrder) || [];
-  const SPRINGS = useSprings();
-
+// התרחשות (לב ההתהוות): מה קורה בבית ואיך מצטרפים. בשלב הזה – קבוצות הלמידה והזמנה להציע.
+export default function Happenings() {
+  const intro = useContent('happeningsIntro');
+  const t = useT();
   return (
     <div className="page">
-      <PageHead spaceKey="depth" lead={intro} deep={deep} />
-
-      <section className="section">
-        <h2>ארבעה מעיינות</h2>
-        <div className="springs">
-          {SPRINGS.map((s, i) => {
-            const items = readings.filter((r) => r.spring === s.key);
-            return (
-              <article key={s.key} className={`card spring tone-${['sun', 'turquoise', 'sage', 'blossom'][i % 4]}`}>
-                <Motif kind="spring" size={44} />
-                <h3>{s.title}</h3>
-                <p className="spring-short">{s.short}</p>
-                <details className="deeper inline"><summary>להעמיק</summary><p className="muted">{s.text}</p></details>
-                {items.length ? (
-                  <ul className="readings">
-                    {items.map((r) => (
-                      <li key={r.id}>
-                        {r.url ? <a href={r.url} target="_blank" rel="noreferrer">{r.title}</a> : <strong>{r.title}</strong>}
-                        {r.author ? <span className="muted"> · {r.author}</span> : null}
-                        {r.note ? <p className="small">{r.note}</p> : null}
-                      </li>
-                    ))}
-                  </ul>
-                ) : <Empty>עוד אין כאן מקורות.</Empty>}
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <details className="card assumptions">
-        <summary>נקודות הנחה לפתח הלימוד</summary>
-        <Prose text={assumptions} />
-      </details>
-
+      <PageHead spaceKey="happenings" lead={intro}>
+        <button type="button" className="btn" onClick={() => openIdea('idea', t('happenings-suggest-prompt'))}>{t('happenings-suggest')}</button>
+      </PageHead>
       <StudyCircles />
-
-      <section className="section">
-        <h2>הצעות למקורות ושיחה על מהות השינוי</h2>
-        <Comments targetType="depth" targetId="library" placeholder="ספר, מאמר, מקום, מסורת, ניסוי שכבר קיים – או מחשבה על השינוי שמתקיים עכשיו" />
-      </section>
-      <Paths keys={['categories', 'tickle', 'compass']} />
+      <Paths keys={['categories', 'library', 'dreams']} />
     </div>
   );
 }

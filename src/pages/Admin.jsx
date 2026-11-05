@@ -10,34 +10,40 @@ import { FEEDBACK_TYPES, LABEL_GROUPS, DEFAULT_LABELS } from '../content/default
 
 const TEXTS = [
   ['welcomeBody', 'שער הכניסה – טקסט הפתיחה'],
-  ['welcomeQuestion', 'שער הכניסה – השאלה מעל השבילים'],
-  ['sparksBody', 'שער הכניסה – הניצוצות'],
-  ['inviteBody', 'שער הכניסה – הזמנה להביא משהו מעצמנו'],
-  ['growingQuestion', 'שער הכניסה – כותרת "מה צומח עכשיו"'],
-  ['compassIntro', 'המצפן – פתיח קצר'],
-  ['compassDeep', 'המצפן – להעמיק'],
-  ['celebrateIntro', 'חגיגה והשראה – פתיח קצר'],
-  ['celebrateDeep', 'חגיגה והשראה – להעמיק'],
-  ['gideiBayit', 'גידולי בית – הכרטיס ב"מתהווה אצלנו"'],
-  ['openQuestion', 'שאלה שמלווה אותנו (בשער הכניסה)'],
-  ['timingTitle', 'העיתוי – כותרת'],
-  ['timingIntro', 'העיתוי – משפט פתיחה'],
-  ['timingQuestions', 'העיתוי – שאלות להתבוננות (שאלה בכל שורה)'],
-  ['timingBody', 'העיתוי – להעמיק'],
-  ['voicesIntro', 'הזמנה ל"קולות מהתפר"'],
-  ['dreamsIntro', 'החלום הרחב – פתיח קצר'],
-  ['dreamsDeep', 'החלום הרחב – להעמיק'],
-  ['categoriesIntro', 'מרחבי חיים – פתיח קצר'],
-  ['categoriesDeep', 'מרחבי חיים – להעמיק'],
-  ['harvestIntro', 'פתיח לקצירים'],
-  ['depthIntro', 'מעמיקים ומשתנים – פתיח קצר'],
-  ['depthDeep', 'מעמיקים ומשתנים – להעמיק'],
-  ['assumptions', 'נקודות הנחה'],
-  ['tickleIntro', 'דגדוג חלומות – פתיח קצר'],
-  ['tickleDeep', 'דגדוג חלומות – "ומה אם אין לי חלום?"'],
-  ['painIntro', 'מהתפר – פתיח קצר'],
-  ['painDeep', 'מהתפר – להעמיק'],
-  ['newIntro', 'מהו חדש – פתיח (בתוך המצפן)'],
+  ['mapIntro', 'מפת ההתמצאות – משפט הפתיחה'],
+  ['mapDreaming', 'מפת ההתמצאות – כנף החלימה'],
+  ['mapSensing', 'מפת ההתמצאות – כנף החישה'],
+  ['mapBecoming', 'מפת ההתמצאות – לב ההתהוות'],
+  ['mapAbout', 'מפת ההתמצאות – רגל אודות'],
+  ['mapTogether', 'מפת ההתמצאות – רגל יחד בבית'],
+  ['growingQuestion', 'שער הכניסה – כותרת "מה צומח עכשיו" (מוצג רק אם הופעל בהגדרות)'],
+  ['dreamsIntro', 'חלימה ← שיתוף חלום – פתיח קצר'],
+  ['dreamsDeep', 'חלימה ← שיתוף חלום – להעמיק'],
+  ['tickleIntro', 'חלימה ← הנבעת חלום – פתיח קצר'],
+  ['tickleDeep', 'חלימה ← הנבעת חלום – "ומה אם אין לי חלום?"'],
+  ['categoriesIntro', 'התהוות ← מרחבי החיים – פתיח קצר'],
+  ['categoriesDeep', 'התהוות ← מרחבי החיים – להעמיק'],
+  ['harvestIntro', 'התהוות ← מרחבי החיים – פתיח לקצירים'],
+  ['happeningsIntro', 'התהוות ← התרחשות – פתיח'],
+  ['depthIntro', 'התהוות ← ספריה – פתיח קצר'],
+  ['depthDeep', 'התהוות ← ספריה – להעמיק'],
+  ['assumptions', 'התהוות ← ספריה – נקודות הנחה'],
+  ['observeIntro', 'חישה ← התבוננות – פתיח'],
+  ['timingQuestions', 'חישה ← התבוננות – שאלות (שאלה בכל שורה)'],
+  ['voicesIntro', 'חישה ← התבוננות – הזמנה ל"קולות מהתפר"'],
+  ['painIntro', 'חישה ← שיתוף קושי – פתיח קצר'],
+  ['painDeep', 'חישה ← שיתוף קושי – להעמיק'],
+  ['celebrateIntro', 'חישה ← חגיגה והשראה – פתיח קצר'],
+  ['celebrateDeep', 'חישה ← חגיגה והשראה – להעמיק'],
+  ['gideiBayit', 'חישה ← חגיגה והשראה – כרטיס גידולי בית'],
+  ['timingTitle', 'אודות ← למה עכשיו? – כותרת'],
+  ['timingIntro', 'אודות ← למה עכשיו? – משפט פתיחה'],
+  ['timingBody', 'אודות ← למה עכשיו? – הטקסט'],
+  ['newIntro', 'אודות ← מהו חדש? – פתיח'],
+  ['compassIntro', 'אודות ← מצפן – פתיח קצר'],
+  ['compassDeep', 'אודות ← מצפן – להעמיק'],
+  ['visionIntro', 'אודות ← חזון – פתיח'],
+  ['visionBody', 'אודות ← חזון – הטקסט'],
 ];
 
 function TextEditor({ k, label }) {
@@ -254,6 +260,10 @@ function Settings() {
       {f('meditationUrl', 'קישור לקובץ מדיטציה מונחית', 'מופיע בדף דגדוג החלומות. גם כאן: /audio/שם-הקובץ.mp3')}
       {f('meditationTitle', 'כותרת המדיטציה')}
       {f('gideiBayitUrl', 'קישור לגידולי בית', 'מופיע בכרטיס של גידולי בית ב"חגיגה והשראה" ← "מתהווה אצלנו"')}
+      <label className="field check-row">
+        <input type="checkbox" checked={!!s.showGrowing} onChange={(e) => setS({ ...s, showGrowing: e.target.checked })} />
+        <span>להציג בשער הכניסה את "מה צומח עכשיו" – ארבעת השיתופים האחרונים</span>
+      </label>
       <p className="hint">חשוב: רק מוזיקה שלך או ברישיון שימוש חופשי.</p>
       <div className="row-end">{status ? <span className="notice inline">{status}</span> : null}
         <button type="button" className="btn" onClick={async () => { await backend.set('settings', 'site', s); setStatus('נשמר'); setTimeout(() => setStatus(''), 1800); }}>שמירה</button>

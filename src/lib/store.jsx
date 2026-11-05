@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { backend, isDemo } from './backend.js';
 import {
-  DEFAULT_CONTENT, DEFAULT_LABELS, SPACES, DREAM_LAYERS, STORY_KINDS, DECKS, FEEDBACK_TYPES, INVITE_WAYS,
+  DEFAULT_CONTENT, DEFAULT_LABELS, SPACES, NAV_GROUPS, DREAM_LAYERS, STORY_KINDS, DECKS, FEEDBACK_TYPES,
   IDEA_KINDS, LENSES, SPRINGS,
 } from '../content/defaults.js';
 
@@ -62,15 +62,15 @@ function useLocalized(list, prefix, fields) {
 }
 const F = {
   space: ['title', 'line', 'eyebrow'], layer: ['title', 'question'], story: ['title', 'text'], deck: ['title', 'text'],
-  feedback: ['label', 'hint'], way: ['label', 'prompt'], kind: ['label', 'titleLabel', 'placeholder'],
+  feedback: ['label', 'hint'], group: ['title', 'name'], kind: ['label', 'titleLabel', 'placeholder'],
   lens: ['title', 'question'], spring: ['title', 'short', 'text'],
 };
 export const useSpaces = () => useLocalized(SPACES, 'space', F.space);
+export const useNavGroups = () => useLocalized(NAV_GROUPS, 'group', F.group);
 export const useDreamLayers = () => useLocalized(DREAM_LAYERS, 'layer', F.layer);
 export const useStoryKinds = () => useLocalized(STORY_KINDS, 'story', F.story);
 export const useDecks = () => useLocalized(DECKS, 'deck', F.deck);
 export const useFeedbackTypes = () => useLocalized(FEEDBACK_TYPES, 'feedback', F.feedback);
-export const useInviteWays = () => useLocalized(INVITE_WAYS, 'way', F.way);
 export const useIdeaKinds = () => useLocalized(IDEA_KINDS, 'kind', F.kind);
 export const useLenses = () => useLocalized(LENSES, 'lens', F.lens);
 export const useSprings = () => useLocalized(SPRINGS, 'spring', F.spring);

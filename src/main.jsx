@@ -8,10 +8,14 @@ import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import Timing from './pages/Timing.jsx';
 import Compass from './pages/Compass.jsx';
+import NewDefinition from './pages/NewDefinition.jsx';
+import Vision from './pages/Vision.jsx';
+import Observe from './pages/Observe.jsx';
+import Happenings from './pages/Happenings.jsx';
+import Library from './pages/Library.jsx';
 import Celebrate from './pages/Celebrate.jsx';
 import { DreamForm, DreamView, DreamsPage } from './pages/Dreams.jsx';
 import { CategoriesPage, CategoryView, IdeaView } from './pages/Categories.jsx';
-import Depth from './pages/Depth.jsx';
 import Tickle from './pages/Tickle.jsx';
 import { ThresholdPage, ThresholdPost } from './pages/Threshold.jsx';
 import Admin from './pages/Admin.jsx';
@@ -32,7 +36,12 @@ function App() {
             <Route index element={<Home />} />
             <Route path="timing" element={<Timing />} />
             <Route path="compass" element={<Compass />} />
-            <Route path="new" element={<Navigate to="/compass#new" replace />} />
+            <Route path="new" element={<NewDefinition />} />
+            <Route path="vision" element={<Vision />} />
+            <Route path="observe" element={<Observe />} />
+            <Route path="happenings" element={<Happenings />} />
+            <Route path="library" element={<Library />} />
+            <Route path="depth" element={<Navigate to="/library" replace />} />
             <Route path="celebrate" element={<Celebrate />} />
             {/* היומן הישן עבר לגן החלומות – קישורים ישנים ממשיכים לעבוד */}
             <Route path="my-dream" element={<Navigate to="/dreams" replace />} />
@@ -44,7 +53,6 @@ function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="categories/:id" element={<CategoryView />} />
             <Route path="ideas/:id" element={<IdeaView />} />
-            <Route path="depth" element={<Depth />} />
             <Route path="tickle" element={<Tickle />} />
             <Route path="threshold" element={<ThresholdPage />} />
             <Route path="threshold/:id" element={<ThresholdPost />} />

@@ -43,7 +43,7 @@ export function CategoriesPage() {
           ))}
         </div>
       )}
-      <Paths keys={['depth', 'dreams', 'threshold']} />
+      <Paths keys={['happenings', 'library', 'dreams']} />
     </div>
   );
 }

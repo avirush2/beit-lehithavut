@@ -108,7 +108,7 @@ export default function Tickle() {
         </section>
       ) : null}
 
-      <Paths keys={['dreams', 'threshold', 'timing']} />
+      <Paths keys={['dreams', 'threshold', 'observe']} />
     </div>
   );
 }

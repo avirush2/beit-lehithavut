@@ -1,21 +1,17 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useContent } from '../lib/store.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { PageHead } from '../components/Botanical.jsx';
 import { Empty, useCompass } from '../components/ui.jsx';
-import NewDefinition from './NewDefinition.jsx';
 
-// המצפן: שבעת העקרונות שמכוונים את ההתבוננות והחקירה, ולצדם ההגדרה החיה של "מהו חדש".
+// המצפן: שבעת העקרונות שמכוונים את ההתבוננות והחקירה. ("מהו חדש" עבר לעמוד משלו באודות.)
 export default function Compass() {
   const intro = useContent('compassIntro');
   const deep = useContent('compassDeep');
   const items = useCompass();
   const { hash } = useLocation();
 
-  useEffect(() => {
-    if (hash === '#new') setTimeout(() => document.getElementById('new')?.scrollIntoView({ behavior: 'smooth' }), 200);
-  }, [hash]);
+  if (hash === '#new') return <Navigate to="/new" replace />;
 
   return (
     <div className="page">
@@ -32,8 +28,7 @@ export default function Compass() {
           ))}
         </ol>
       )}
-      <NewDefinition embedded />
-      <Paths keys={['dreams', 'categories', 'depth']} />
+      <Paths keys={['new', 'vision', 'dreams']} />
     </div>
   );
 }

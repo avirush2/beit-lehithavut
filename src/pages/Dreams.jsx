@@ -70,7 +70,7 @@ export function DreamsPage() {
       ) : dreams.length === 0 ? (
         <Empty>הגן עוד ריק. הניצוץ הראשון יהיה הזרע הראשון.</Empty>
       ) : view === 'garden' ? <Garden dreams={dreams} resonances={resonances || []} /> : <DreamCards dreams={dreams} />}
-      <Paths keys={['categories', 'tickle', 'timing']} />
+      <Paths keys={['tickle', 'categories', 'observe']} />
     </div>
   );
 }

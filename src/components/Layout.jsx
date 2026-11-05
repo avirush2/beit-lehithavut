@@ -1,7 +1,7 @@
 import { Component, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { backend, isDemo } from '../lib/backend.js';
-import { useAuth, useCollection, useSettings, useSpaces, useT } from '../lib/store.jsx';
+import { useAuth, useCollection, useFeedbackTypes, useNavGroups, useSettings, useSpaces, useT } from '../lib/store.jsx';
 import { harvestWindow } from '../lib/seasons.js';
 import { SITE } from '../content/defaults.js';
 import { Motif } from './Botanical.jsx';
@@ -75,12 +75,75 @@ class PageBoundary extends Component {
   }
 }
 
+// מבנה הבית: כל לשונית עם הפריטים שלה – מרחבים (קישורים) או סוגי פנייה ב"יש לנו רעיון"
+export function useHouse() {
+  const spaces = useSpaces();
+  const groups = useNavGroups();
+  const feedbackTypes = useFeedbackTypes();
+  return groups.map((g) => ({
+    ...g,
+    items: g.together
+      ? feedbackTypes.map((f) => ({ key: f.key, title: f.label, line: f.hint, tone: g.tone, open: () => openIdea(f.key) }))
+      : g.spaces.map((k) => spaces.find((s) => s.key === k)).filter(Boolean),
+  }));
+}
+
+const inSpace = (pathname, s) => [s.to, ...(s.also || [])].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
+function MainNav() {
+  const house = useHouse();
+  const t = useT();
+  const { pathname } = useLocation();
+  const [open, setOpen] = useState(null);
+  const ref = useRef(null);
+  useEffect(() => { setOpen(null); }, [pathname]);
+  useEffect(() => {
+    if (!open) return undefined;
+    const away = (e) => { if (!ref.current?.contains(e.target)) setOpen(null); };
+    const esc = (e) => { if (e.key === 'Escape') setOpen(null); };
+    document.addEventListener('mousedown', away);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  const current = house.find((g) => g.items.some((s) => s.to && inSpace(pathname, s)));
+  const panel = house.find((g) => g.key === open);
+
+  return (
+    <nav className="site-nav" aria-label="ניווט ראשי" ref={ref}>
+      <div className="nav-row">
+        <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>{t('nav-home')}</NavLink>
+        {house.map((g) => (
+          <button key={g.key} type="button" aria-expanded={open === g.key}
+            className={`${current?.key === g.key ? 'active' : ''} ${open === g.key ? 'open' : ''}`}
+            onClick={() => setOpen(open === g.key ? null : g.key)}>
+            {g.title}<span className="caret" aria-hidden="true">⌄</span>
+          </button>
+        ))}
+      </div>
+      {panel ? (
+        <div className="nav-panel">
+          <p className="nav-panel-name">{panel.name}</p>
+          <div className="nav-items">
+            {panel.items.map((s) => (s.open ? (
+              <button key={s.key} type="button" className={`nav-item tone-${s.tone}`} onClick={() => { setOpen(null); s.open(); }}>
+                <strong>{s.title}</strong><span>{s.line}</span>
+              </button>
+            ) : (
+              <Link key={s.key} to={s.to} className={`nav-item tone-${s.tone} ${inSpace(pathname, s) ? 'here' : ''}`}>
+                <strong>{s.title}</strong><span>{s.line}</span>
+              </Link>
+            )))}
+          </div>
+        </div>
+      ) : null}
+    </nav>
+  );
+}
+
 export default function Layout() {
   const { user, name, isAdmin, isHost, openSignIn } = useAuth();
   const { pathname } = useLocation();
-  const spaces = useSpaces();
   const t = useT();
-  const nav = [{ to: '/', label: 'שער הכניסה', end: true }, ...spaces.map((s) => ({ to: s.to, label: s.title }))];
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
 
   return (
@@ -91,7 +154,7 @@ export default function Layout() {
           <Rings />
           <span>
             <span className="brand-name">{SITE.name}</span>
-            <span className="brand-tag">{SITE.tagline}</span>
+            <span className="brand-tag">{t('site-tagline')}</span>
           </span>
         </Link>
         <div className="user-area">
@@ -106,17 +169,13 @@ export default function Layout() {
           )}
         </div>
       </header>
-      <nav className="site-nav" aria-label="ניווט ראשי">
-        {nav.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => (isActive ? 'active' : '')}>{n.label}</NavLink>
-        ))}
-      </nav>
+      <MainNav />
       <main className="main">
         <PageBoundary path={pathname}><Outlet /></PageBoundary>
       </main>
       <footer className="site-footer">
         <Rings size={26} />
-        <p>{SITE.name} · {SITE.tagline}</p>
+        <p>{SITE.name} · {t('site-tagline')}</p>
         <p className="muted small">{t('footer-line')}</p>
         <p className="footer-share">
           הבית הזה נבנה יחד · <button type="button" className="link-btn" onClick={() => openIdea()}>{t('footer-share')}</button>

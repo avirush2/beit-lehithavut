@@ -37,7 +37,7 @@ export function ThresholdPage() {
           </Link>
         ))}
       </section>
-      <Paths keys={['timing', 'dreams', 'tickle']} />
+      <Paths keys={['observe', 'tickle', 'celebrate']} />
     </div>
   );
 }
