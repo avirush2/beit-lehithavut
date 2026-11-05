@@ -263,12 +263,11 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .gate-text p:last-child { margin-bottom: 0; }
 /* קישור בתוך טקסט: [מילים](/כתובת) */
 .text-link {
-  display: inline; padding: .05em .6em; border-radius: 99px; text-decoration: none; color: var(--fg); white-space: normal;
-  background: color-mix(in srgb, var(--sun) 45%, var(--surface)); border: 1px solid color-mix(in srgb, var(--pollen) 60%, transparent);
-  box-decoration-break: clone; -webkit-box-decoration-break: clone; transition: background .15s;
+  display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--blossom-ink); cursor: pointer;
+  text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--blossom-ink) 40%, transparent);
+  text-decoration-thickness: 1.5px; text-underline-offset: 4px; transition: text-decoration-color .15s;
 }
-.prose p:has(.text-link) { line-height: 2.15; }
-.text-link:hover { background: color-mix(in srgb, var(--sun) 75%, var(--surface)); }
+.text-link:hover { text-decoration-color: currentColor; }
 .gate-scene { display: block; width: 100%; height: clamp(150px, 20vw, 260px); margin-top: 1rem; }
 .center { text-align: center; }
 

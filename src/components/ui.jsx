@@ -8,13 +8,17 @@ export function formatDate(ms) {
   return new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// קישור בתוך טקסט: [מילים](/כתובת) – הופך לכפתור קישור קטן. כתובת שמתחילה ב-/ נשארת באתר.
+// קישור בתוך טקסט: [מילים](/כתובת). כתובת שמתחילה ב-/ נשארת באתר; (/together) פותח את חלון "יחד בבית".
 function Inline({ text }) {
   const parts = String(text).split(/(\[[^\]]+\]\((?:\/[^)\s]*|https?:\/\/[^)\s]+)\))/g);
   return parts.map((part, i) => {
     const m = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
     if (!m) return part;
     const [, label, to] = m;
+    if (to === '/together') {
+      const open = () => window.dispatchEvent(new CustomEvent('open-idea', { detail: { type: 'feedback' } }));
+      return <button key={i} type="button" className="text-link" onClick={open}>{label}</button>;
+    }
     return to.startsWith('/')
       ? <Link key={i} to={to} className="text-link">{label}</Link>
       : <a key={i} href={to} target="_blank" rel="noreferrer" className="text-link">{label}</a>;
