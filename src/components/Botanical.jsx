@@ -115,7 +115,7 @@ export function GroupHead({ group, current, children }) {
           {children}
         </div>
       </header>
-      {subs.length > 1 ? (
+      {g.sub && subs.length > 1 ? (
         <nav className={g.sub === 'tabs' ? 'sub-tabs' : 'sub-toc'} aria-label={g.title}>
           {subs.map((s) => (
             <Link key={s.key} to={s.to} className={`tone-${s.tone} ${g.sub === 'tabs' && s.key === current ? 'on' : ''}`}

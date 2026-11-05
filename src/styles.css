@@ -261,6 +261,14 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .gate-tag { font-family: var(--display); font-size: clamp(1.15rem, 2.6vw, 1.5rem); color: var(--muted); margin-bottom: 1.4rem; }
 .gate-text p { font-size: 1.12rem; }
 .gate-text p:last-child { margin-bottom: 0; }
+/* קישור בתוך טקסט: [מילים](/כתובת) */
+.text-link {
+  display: inline; padding: .05em .6em; border-radius: 99px; text-decoration: none; color: var(--fg); white-space: normal;
+  background: color-mix(in srgb, var(--sun) 45%, var(--surface)); border: 1px solid color-mix(in srgb, var(--pollen) 60%, transparent);
+  box-decoration-break: clone; -webkit-box-decoration-break: clone; transition: background .15s;
+}
+.prose p:has(.text-link) { line-height: 2.15; }
+.text-link:hover { background: color-mix(in srgb, var(--sun) 75%, var(--surface)); }
 .gate-scene { display: block; width: 100%; height: clamp(150px, 20vw, 260px); margin-top: 1rem; }
 .center { text-align: center; }
 

@@ -1,14 +1,27 @@
 import { useEffect, useState } from 'react';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, byOrder } from '../lib/store.jsx';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export function formatDate(ms) {
   if (!ms) return '';
   return new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// טקסט פשוט: שורה ריקה = פסקה חדשה, "* " = פריט ברשימה, "## " = כותרת
+// קישור בתוך טקסט: [מילים](/כתובת) – הופך לכפתור קישור קטן. כתובת שמתחילה ב-/ נשארת באתר.
+function Inline({ text }) {
+  const parts = String(text).split(/(\[[^\]]+\]\((?:\/[^)\s]*|https?:\/\/[^)\s]+)\))/g);
+  return parts.map((part, i) => {
+    const m = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
+    if (!m) return part;
+    const [, label, to] = m;
+    return to.startsWith('/')
+      ? <Link key={i} to={to} className="text-link">{label}</Link>
+      : <a key={i} href={to} target="_blank" rel="noreferrer" className="text-link">{label}</a>;
+  });
+}
+
+// טקסט פשוט: שורה ריקה = פסקה חדשה, "* " = פריט ברשימה, "## " = כותרת, [מילים](/כתובת) = קישור
 export function Prose({ text, className = '' }) {
   if (!text) return null;
   const blocks = String(text).replace(/\r/g, '').split(/\n\s*\n/);
@@ -19,14 +32,14 @@ export function Prose({ text, className = '' }) {
         const out = [];
         let list = [];
         const flush = (k) => {
-          if (list.length) out.push(<ul key={`u${k}`}>{list.map((li, j) => <li key={j}>{li}</li>)}</ul>);
+          if (list.length) out.push(<ul key={`u${k}`}>{list.map((li, j) => <li key={j}><Inline text={li} /></li>)}</ul>);
           list = [];
         };
         lines.forEach((line, j) => {
           const t = line.trim();
           if (/^[*-]\s+/.test(t)) list.push(t.replace(/^[*-]\s+/, ''));
           else if (t.startsWith('## ')) { flush(j); out.push(<h3 key={j}>{t.slice(3)}</h3>); }
-          else { flush(j); out.push(<p key={j}>{t}</p>); }
+          else { flush(j); out.push(<p key={j}><Inline text={t} /></p>); }
         });
         flush('end');
         return <div key={i} className="prose-block">{out}</div>;

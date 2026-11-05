@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useDoc, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
-import { GroupHead, SectionHead } from '../components/Botanical.jsx';
+import { GroupHead } from '../components/Botanical.jsx';
 import GardenScene from '../components/GardenScene.jsx';
 import Tickle from './Tickle.jsx';
 import {
@@ -25,11 +25,10 @@ function DreamCards({ dreams }) {
   );
 }
 
-// עמוד החלימה: שיתוף חלום, ומתחתיו הנבעת חלום. (גן החלומות מוסתר כרגע – החלומות מוצגים כרשימה.)
+// עמוד החלימה: הפתיח (הניצוצות), החלומות שכבר כאן, ובתחתית הנבעת חלום. (גן החלומות מוסתר כרגע.)
 export function DreamsPage() {
   const { isHost, requireUser } = useAuth();
   const navigate = useNavigate();
-  const intro = useContent('dreamsIntro');
   const dreams = visibleFor(useCollection('dreams'), isHost)?.sort(byNewest);
   const t = useT();
 
@@ -38,13 +37,12 @@ export function DreamsPage() {
       <div className="space-scene tone-blossom">
         <GardenScene height={200} flowers={30} seed={11} />
       </div>
-      <GroupHead group="dreaming" current="dreams" />
+      <GroupHead group="dreaming" current="dreams">
+        <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
+      </GroupHead>
 
       <section className="section" id="dreams">
-        <SectionHead spaceKey="dreams" lead={intro}>
-          <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
-        </SectionHead>
-
+        <h2>{t('dreams-list-title')}</h2>
       {dreams == null ? <Loading /> : dreams.length === 0 ? (
         <Empty>עוד אין כאן חלומות. הניצוץ הראשון מחכה.</Empty>
       ) : <DreamCards dreams={dreams} />}
