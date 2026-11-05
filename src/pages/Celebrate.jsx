@@ -9,7 +9,7 @@ function usePrompts() {
 import Comments from '../components/Comments.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { PageHead } from '../components/Botanical.jsx';
-import { Byline, Empty, ItemActions, Loading, Prose } from '../components/ui.jsx';
+import { Byline, Empty, ItemActions, LifeSpacePicker, Loading, Prose, SpaceBadges } from '../components/ui.jsx';
 
 // חגיגה והשראה מההווה: המבט אל מה שכבר צומח. לא גלריה שמוצגת מלמעלה – מקום שכולם מוסיפים אליו.
 function StoryForm({ initialKind, onDone }) {
@@ -20,10 +20,11 @@ function StoryForm({ initialKind, onDone }) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
+  const [spaces, setSpaces] = useState([]);
   const save = async (e) => {
     e.preventDefault();
     if (!requireUser() || !title.trim()) return;
-    await backend.add('stories', { kind, title: title.trim(), body: body.trim(), link: link.trim(), ...stamp() });
+    await backend.add('stories', { kind, title: title.trim(), body: body.trim(), link: link.trim(), spaces, ...stamp() });
     onDone();
   };
   return (
@@ -38,6 +39,7 @@ function StoryForm({ initialKind, onDone }) {
         <textarea rows={5} value={body} onChange={(e) => setBody(e.target.value)} placeholder={PROMPTS.join(' ')} />
       </label>
       <label className="field"><span className="field-label">קישור (לא חובה)</span><input value={link} onChange={(e) => setLink(e.target.value)} dir="ltr" placeholder="https://" /></label>
+      <LifeSpacePicker value={spaces} onChange={setSpaces} />
       <div className="row-end">
         <button type="button" className="btn btn-ghost" onClick={onDone}>ביטול</button>
         <button className="btn" disabled={!title.trim()}>לשתף</button>
@@ -100,6 +102,7 @@ export default function Celebrate() {
               <article key={s.id} className={`card story-card ${s.hidden ? 'is-hidden' : ''}`}>
                 <h3>{s.title}</h3>
                 <Prose text={s.body} />
+                <SpaceBadges ids={s.spaces} />
                 {/^https?:\/\//i.test(s.link || '') ? <a href={s.link} target="_blank" rel="noreferrer" dir="ltr" className="small">{s.link.replace(/^https?:\/\//, '').slice(0, 40)}</a> : null}
                 <div className="comment-foot">
                   <Byline name={s.name} createdAt={s.createdAt} hidden={s.hidden} />

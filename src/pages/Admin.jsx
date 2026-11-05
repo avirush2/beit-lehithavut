@@ -5,7 +5,8 @@ import { useAuth, useCollection, useDoc, byNewest, byOrder } from '../lib/store.
 import { seedMissing, upgradeWording } from '../lib/seed.js';
 import { nextHarvest } from '../lib/seasons.js';
 import { DEFAULT_CONTENT, SPRINGS } from '../content/defaults.js';
-import { Empty, Loading, formatDate } from '../components/ui.jsx';
+import { Empty, LifeSpacePicker, Loading, formatDate } from '../components/ui.jsx';
+import { HappeningForm, useKindOf } from './Happenings.jsx';
 import { FEEDBACK_TYPES, LABEL_GROUPS, DEFAULT_LABELS } from '../content/defaults.js';
 
 const TEXTS = [
@@ -83,7 +84,11 @@ function CollectionEditor({ col, fields, blank, filter }) {
     <div className="editor">
       {shown.map((item) => (
         <div key={item.id} className="card editor-row">
-          {fields.map((f) => (
+          {fields.map((f) => (f.type === 'spaces' ? (
+            <div key={f.key} className="field grow">
+              <LifeSpacePicker value={val(item, f.key) || []} onChange={(v) => edit(item.id, f.key, v)} label={f.label} />
+            </div>
+          ) : (
             <label key={f.key} className={`field ${f.type === 'textarea' ? 'grow' : ''}`}>
               <span className="field-label">{f.label}</span>
               {f.type === 'textarea' ? <textarea rows={3} value={val(item, f.key)} onChange={(e) => edit(item.id, f.key, e.target.value)} />
@@ -95,7 +100,7 @@ function CollectionEditor({ col, fields, blank, filter }) {
                   : f.type === 'number' ? <input type="number" value={val(item, f.key)} onChange={(e) => edit(item.id, f.key, Number(e.target.value))} />
                     : <input value={val(item, f.key)} onChange={(e) => edit(item.id, f.key, e.target.value)} dir={f.ltr ? 'ltr' : undefined} />}
             </label>
-          ))}
+          )))}
           <div className="row-end">
             <button type="button" className="link-btn quiet" onClick={() => window.confirm('למחוק?') && backend.remove(col, item.id)}>מחיקה</button>
             <button type="button" className="btn btn-small" disabled={!drafts[item.id]} onClick={() => save(item)}>שמירה</button>
@@ -311,9 +316,156 @@ function Start() {
   );
 }
 
+// --- תיבה מרוכזת: כל מה שנכנס לבית, מכל המגירות, במקום אחד ---
+const cut = (s, n = 220) => (s && s.length > n ? `${s.slice(0, n)}…` : s || '');
+const DRAWERS = [
+  ['dreams', 'חלום', (x) => x.title, (x) => x.body, (x) => `/dreams/${x.id}`],
+  ['ideas', 'מרחבי החיים', (x) => x.title, (x) => x.body, (x) => `/ideas/${x.id}`],
+  ['pain', 'שיתוף קושי', () => '', (x) => x.body, (x) => `/threshold/${x.id}`],
+  ['voices', 'התבוננות', () => '', (x) => [x.dissolving && `מתמוסס: ${x.dissolving}`, x.emerging && `מתהווה: ${x.emerging}`].filter(Boolean).join(' · '), () => '/observe'],
+  ['stories', 'חגיגה והשראה', (x) => x.title, (x) => x.body, () => '/celebrate'],
+  ['comments', 'תגובה', () => '', (x) => x.body, (x) => ({ dream: `/dreams/${x.targetId}`, idea: `/ideas/${x.targetId}`, pain: `/threshold/${x.targetId}`, happening: `/happenings/${x.targetId}`, proposal: '/new', story: '/celebrate', depth: '/library' }[x.targetType] || '/')],
+  ['studyCircles', 'קבוצת למידה', (x) => x.topic, (x) => x.description, () => '/happenings'],
+  ['happenings', 'התרחשות', (x) => x.title, (x) => x.body, (x) => `/happenings/${x.id}`],
+  ['happeningProposals', 'הצעה להתרחשות', (x) => x.title, (x) => x.body, () => '/admin'],
+  ['definitionProposals', 'הצעה ל"מהו חדש"', () => '', (x) => x.text, () => '/new'],
+  ['feedback', 'יש לנו רעיון', () => '', (x) => x.message, (x) => x.path || '/'],
+];
+
+function useInbox() {
+  const lists = DRAWERS.map(([col]) => useCollection(col)); // eslint-disable-line react-hooks/rules-of-hooks
+  const spaces = useCollection('categories') || [];
+  if (lists.some((l) => l == null)) return null;
+  const spaceName = (ids) => (ids || []).map((i) => spaces.find((s) => s.id === i)?.name).filter(Boolean).join(', ');
+  return DRAWERS.flatMap(([col, label, title, text, link], i) => lists[i].map((x) => ({
+    key: `${col}-${x.id}`, col, id: x.id, label, title: title(x) || '', text: text(x) || '', link: link(x),
+    name: x.orgName ? `${x.orgName} (${x.name || ''})` : (x.name || ''), createdAt: x.createdAt || 0, hidden: !!x.hidden,
+    spaces: spaceName(x.spaces), status: x.status || '',
+  }))).sort(byNewest);
+}
+
+function toCsv(rows) {
+  const cols = [['label', 'סוג'], ['date', 'תאריך'], ['name', 'שם'], ['title', 'כותרת'], ['text', 'תוכן'], ['spaces', 'מרחבי חיים'], ['status', 'סטטוס'], ['hidden', 'מוסתר'], ['url', 'קישור']];
+  const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const body = rows.map((r) => cols.map(([k]) => esc(k === 'date' ? formatDate(r.createdAt) : k === 'hidden' ? (r.hidden ? 'כן' : '') : k === 'url' ? `${window.location.origin}${r.link}` : r[k])).join(','));
+  // BOM – כדי שאקסל יקרא עברית כמו שצריך
+  return `﻿${[cols.map(([, l]) => esc(l)).join(','), ...body].join('\r\n')}`;
+}
+
+function download(name, text) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function Inbox() {
+  const all = useInbox();
+  const [type, setType] = useState('');
+  const [q, setQ] = useState('');
+  const [days, setDays] = useState('30');
+  if (all == null) return <Loading />;
+  const since = days ? Date.now() - Number(days) * 86400000 : 0;
+  const needle = q.trim();
+  const shown = all.filter((x) => (!type || x.col === type) && x.createdAt >= since
+    && (!needle || `${x.title} ${x.text} ${x.name} ${x.spaces}`.includes(needle)));
+  const hideable = (col) => !['feedback', 'happeningProposals'].includes(col);
+  return (
+    <>
+      <p className="muted">כל מה שנכתב בבית, מכל המרחבים, מהחדש לישן. אפשר לסנן, לחפש, להסתיר – ולייצא לגיליון.</p>
+      <div className="row-start wrap inbox-filters">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="חיפוש" style={{ maxWidth: 220 }} />
+        <select value={type} onChange={(e) => setType(e.target.value)} style={{ width: 'auto' }}>
+          <option value="">כל הסוגים</option>
+          {DRAWERS.map(([col, label]) => <option key={col} value={col}>{label}</option>)}
+        </select>
+        <select value={days} onChange={(e) => setDays(e.target.value)} style={{ width: 'auto' }}>
+          <option value="7">השבוע</option>
+          <option value="30">החודש</option>
+          <option value="90">שלושה חודשים</option>
+          <option value="">מאז ומעולם</option>
+        </select>
+        <button type="button" className="btn btn-small" disabled={!shown.length} onClick={() => download(`beit-lehithavut-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(shown))}>ייצוא לגיליון ({shown.length})</button>
+      </div>
+      {shown.length === 0 ? <Empty>אין כאן פריטים בטווח הזה.</Empty> : (
+        <ul className="admin-list inbox">
+          {shown.slice(0, 200).map((x) => (
+            <li key={x.key} className={`card ${x.hidden ? 'is-hidden' : ''}`}>
+              <div className="badges">
+                <span className="badge">{x.label}</span>
+                <span className="badge">{formatDate(x.createdAt)}</span>
+                {x.spaces ? <span className="badge space-badge">{x.spaces}</span> : null}
+                {x.hidden ? <span className="badge warn">מוסתר</span> : null}
+              </div>
+              {x.title ? <p><strong>{x.title}</strong></p> : null}
+              {x.text ? <p className="muted pre">{cut(x.text)}</p> : null}
+              <div className="row-between wrap">
+                <span className="small">{x.name}</span>
+                <span className="row-start">
+                  <Link to={x.link} className="link-btn quiet">לצפייה</Link>
+                  {hideable(x.col) ? <button type="button" className="link-btn quiet" onClick={() => backend.update(x.col, x.id, { hidden: !x.hidden })}>{x.hidden ? 'החזרה' : 'הסתרה'}</button> : null}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {shown.length > 200 ? <p className="hint">מוצגים 200 הראשונים. הייצוא כולל את כולם.</p> : null}
+    </>
+  );
+}
+
+// הצעות להתרחשות שמשתתפים שלחו. פרסום – יוצר התרחשות גלויה (אפשר לערוך לפני).
+function HappeningProposals() {
+  const all = useCollection('happeningProposals')?.sort(byNewest);
+  const kindOf = useKindOf();
+  const [editing, setEditing] = useState(null);
+  const [status, setStatus] = useState('new');
+  if (all == null) return <Loading />;
+  const shown = all.filter((p) => !status || p.status === status);
+  const STATUS = [['new', 'חדשה'], ['published', 'פורסמה'], ['declined', 'לא כעת']];
+  return (
+    <>
+      <p className="muted">הצעות שהגיעו מהכפתור "להציע התרחשות". פרטי הקשר גלויים רק למארחים.</p>
+      <div className="chips">
+        {STATUS.map(([k, l]) => <button key={k} type="button" className={`chip ${status === k ? 'on' : ''}`} onClick={() => setStatus(status === k ? '' : k)}>{l} ({all.filter((p) => p.status === k).length})</button>)}
+      </div>
+      {shown.length === 0 ? <Empty>אין כאן הצעות כרגע.</Empty> : (
+        <ul className="admin-list">
+          {shown.map((p) => (
+            <li key={p.id} className="card">
+              {editing === p.id ? (
+                <HappeningForm initial={{ ...p, id: undefined, fromProposal: true }} onDone={async (saved) => {
+                  if (saved) await backend.update('happeningProposals', p.id, { status: 'published' });
+                  setEditing(null);
+                }} />
+              ) : (
+                <>
+                  <div className="badges"><span className="badge">{kindOf(p.kind).title}</span><span className="badge">{formatDate(p.createdAt)}</span></div>
+                  <p><strong>{p.title}</strong></p>
+                  {p.body ? <p className="pre">{p.body}</p> : null}
+                  <dl className="happening-meta">
+                    {['who', 'when', 'where', 'join', 'link'].filter((k) => p[k]).map((k) => <div key={k}><dt>{kindOf(p.kind).fields[k] || k}</dt><dd>{p[k]}</dd></div>)}
+                  </dl>
+                  <p className="small"><strong>{p.name}</strong>{p.contact ? <> · <span dir="auto">{p.contact}</span></> : null}</p>
+                  <div className="row-start wrap">
+                    {p.status !== 'published' ? <button type="button" className="btn btn-small" onClick={() => setEditing(p.id)}>עריכה ופרסום</button> : null}
+                    {p.status === 'new' ? <button type="button" className="btn btn-small btn-ghost" onClick={() => backend.update('happeningProposals', p.id, { status: 'declined' })}>לא כעת</button> : null}
+                    <button type="button" className="link-btn quiet" onClick={() => window.confirm('למחוק את ההצעה לצמיתות?') && backend.remove('happeningProposals', p.id)}>מחיקה</button>
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
 const TABS = [
-  ['start', 'התחלה'], ['texts', 'טקסטים'], ['labels', 'תוויות וכותרות'], ['compass', 'מצפן'], ['categories', 'מרחבי חיים'],
-  ['cards', 'קלפים'], ['readings', 'ספרייה'], ['feedback', 'משוב'], ['reports', 'דיווחים'], ['people', 'משתתפים'], ['settings', 'הגדרות'],
+  ['start', 'התחלה'], ['inbox', 'תיבה מרוכזת'], ['texts', 'טקסטים'], ['labels', 'תוויות וכותרות'], ['compass', 'מצפן'], ['categories', 'מרחבי חיים'],
+  ['cards', 'קלפים'], ['readings', 'ספריה'], ['proposals', 'הצעות להתרחשות'], ['feedback', 'משוב'], ['reports', 'דיווחים'], ['people', 'משתתפים'], ['settings', 'הגדרות'],
 ];
 
 export default function Admin() {
@@ -343,6 +495,8 @@ export default function Admin() {
         {TABS.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
       </div>
       {tab === 'start' ? <Start /> : null}
+      {tab === 'inbox' ? <Inbox /> : null}
+      {tab === 'proposals' ? <HappeningProposals /> : null}
       {tab === 'texts' ? (
         <>
           <p className="hint">שורה ריקה = פסקה חדשה. "* " בתחילת שורה = פריט ברשימה. "## " = כותרת. רשומות היומן נערכות ישירות בדף "החלום שלי".</p>
@@ -367,7 +521,8 @@ export default function Admin() {
       {tab === 'readings' ? (
         <CollectionEditor col="readings" blank={{ spring: 'present', title: '', author: '', url: '', note: '' }} fields={[
           { key: 'spring', label: 'מעיין', type: 'select', options: SPRINGS.map((s) => [s.key, s.title]) },
-          { key: 'title', label: 'כותרת' }, { key: 'author', label: 'מחבר.ת / מקום' }, { key: 'url', label: 'קישור', ltr: true }, { key: 'note', label: 'כמה מילים', type: 'textarea' }, { key: 'order', label: 'סדר', type: 'number' },
+          { key: 'title', label: 'כותרת' }, { key: 'author', label: 'מחבר.ת / מקום' }, { key: 'url', label: 'קישור', ltr: true }, { key: 'note', label: 'כמה מילים', type: 'textarea' },
+          { key: 'spaces', label: 'מרחבי חיים', type: 'spaces' }, { key: 'order', label: 'סדר', type: 'number' },
         ]} />
       ) : null}
       {tab === 'labels' ? <Labels /> : null}

@@ -91,6 +91,37 @@ export function CompassBadges({ list }) {
   );
 }
 
+// מרחבי החיים הפעילים – לתיוג חלומות, חישות, התרחשויות ומקורות
+export function useLifeSpaces() {
+  const items = useCollection('categories');
+  return items ? items.filter((c) => c.active).sort(byOrder) : [];
+}
+
+// בחירה לא־חובה של מרחבי חיים. value – רשימת מזהי מרחבים.
+export function LifeSpacePicker({ value = [], onChange, label = 'לאיזה מרחב חיים זה קשור? (לא חובה)', collapsible }) {
+  const spaces = useLifeSpaces();
+  const [open, setOpen] = useState(!collapsible || value.length > 0);
+  if (!spaces.length) return null;
+  if (!open) return <button type="button" className="link-btn quiet" onClick={() => setOpen(true)}>+ לאיזה מרחב חיים זה קשור?</button>;
+  const names = spaces.filter((s) => value.includes(s.id)).map((s) => s.name);
+  return (
+    <div className="field">
+      <span className="field-label">{label}</span>
+      <Chips options={spaces.map((s) => s.name)} value={names} onChange={(v) => onChange(spaces.filter((s) => v.includes(s.name)).map((s) => s.id))} />
+    </div>
+  );
+}
+
+export function SpaceBadges({ ids }) {
+  const spaces = useLifeSpaces();
+  const list = spaces.filter((s) => ids?.includes(s.id));
+  if (!list.length) return null;
+  return <div className="badges">{list.map((s) => <span key={s.id} className="badge space-badge">{s.name}</span>)}</div>;
+}
+
+// שם הכותב.ת, ואם שותף בשם ארגון או קהילה – שם הארגון קודם
+export const authorOf = (item) => (item?.orgName ? `${item.orgName} · ${item.name || ''}` : item?.name);
+
 export function Byline({ name, createdAt, hidden }) {
   return (
     <div className="byline">

@@ -3,7 +3,7 @@ import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useT, byNewest, visibleFor } from '../lib/store.jsx';
 import { Paths } from '../components/Layout.jsx';
 import { PageHead } from '../components/Botanical.jsx';
-import { ItemActions } from '../components/ui.jsx';
+import { ItemActions, LifeSpacePicker, SpaceBadges } from '../components/ui.jsx';
 
 // התבוננות (כנף החישה): שאלות על התקופה, וקולות קצרים – מה מתמוסס ומה מבקש להתהוות
 function Voices() {
@@ -13,15 +13,17 @@ function Voices() {
   const items = visibleFor(useCollection('voices'), isHost)?.sort(byNewest).slice(0, 24);
   const [dissolving, setDissolving] = useState('');
   const [emerging, setEmerging] = useState('');
+  const [spaces, setSpaces] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(0);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!(dissolving.trim() || emerging.trim()) || !requireUser()) return;
     setBusy(true);
     try {
-      await backend.add('voices', { dissolving: dissolving.trim(), emerging: emerging.trim(), ...stamp() });
-      setDissolving(''); setEmerging('');
+      await backend.add('voices', { dissolving: dissolving.trim(), emerging: emerging.trim(), spaces, ...stamp() });
+      setDissolving(''); setEmerging(''); setSpaces([]); setSent(sent + 1);
     } finally { setBusy(false); }
   };
 
@@ -38,12 +40,14 @@ function Voices() {
         </label>
         <button className="btn" disabled={busy}>להוסיף קול</button>
       </form>
+      <div className="voices-spaces"><LifeSpacePicker key={sent} value={spaces} onChange={setSpaces} collapsible /></div>
       {items?.length ? (
         <ul className="voices">
           {items.map((v) => (
             <li key={v.id} className={v.hidden ? 'is-hidden' : ''}>
               {v.dissolving ? <p><span className="voice-label">מתמוסס</span>{v.dissolving}</p> : null}
               {v.emerging ? <p><span className="voice-label em">מתהווה</span>{v.emerging}</p> : null}
+              <SpaceBadges ids={v.spaces} />
               <div className="comment-foot">
                 <span className="muted small">{v.name}</span>
                 <ItemActions col="voices" item={v} />

@@ -11,7 +11,9 @@ import IdeaButton, { openIdea } from './IdeaButton.jsx';
 // מונה פניות חדשות – נטען רק אצל מארחים (רק להם מותר לקרוא פניות)
 function NewFeedbackCount() {
   const fresh = useCollection('feedback', ['status', 'new']);
-  return fresh?.length ? <span className="count-badge" title="פניות חדשות ב'יש לנו רעיון'">{fresh.length}</span> : null;
+  const proposals = useCollection('happeningProposals', ['status', 'new']);
+  const n = (fresh?.length || 0) + (proposals?.length || 0);
+  return n ? <span className="count-badge" title="פניות והצעות חדשות">{n}</span> : null;
 }
 
 
@@ -158,6 +160,7 @@ export default function Layout() {
           </span>
         </Link>
         <div className="user-area">
+          <Link to="/search" className="link-btn quiet search-link" aria-label="חיפוש">⌕ חיפוש</Link>
           {isHost ? <Link to="/admin" className="link-btn">{isAdmin ? 'ניהול' : 'אירוח'}<NewFeedbackCount /></Link> : null}
           {user ? (
             <>

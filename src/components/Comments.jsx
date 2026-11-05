@@ -4,7 +4,8 @@ import { useAuth, useCollection, byOldest, visibleFor } from '../lib/store.jsx';
 import { Byline, Chips, CompassBadges, CompassPicker, ItemActions, Prose } from './ui.jsx';
 
 // שרשור תגובות. lens – כיוון דיון (רווחה / התגשמות / ניסויים) עם תגיות משלו.
-export default function Comments({ targetType, targetId, lens, placeholder, prompt, withCompass = true }) {
+// closed – שיחה שנסגרה לכתיבה ונשארת לקריאה (closedText מוצג במקום הטופס)
+export default function Comments({ targetType, targetId, lens, placeholder, prompt, withCompass = true, closed, closedText }) {
   const { isHost, requireUser, stamp } = useAuth();
   const all = useCollection('comments', ['targetId', targetId]);
   const items = visibleFor(all, isHost)
@@ -49,6 +50,7 @@ export default function Comments({ targetType, targetId, lens, placeholder, prom
           ))}
         </ul>
       )}
+      {closed ? <p className="notice">{closedText}</p> : (
       <form className="comment-form" onSubmit={submit}>
         {lens ? (
           <div className="field">
@@ -71,6 +73,7 @@ export default function Comments({ targetType, targetId, lens, placeholder, prom
           <button className="btn" type="submit" disabled={busy || !body.trim()}>שיתוף</button>
         </div>
       </form>
+      )}
     </div>
   );
 }

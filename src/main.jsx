@@ -11,7 +11,8 @@ import Compass from './pages/Compass.jsx';
 import NewDefinition from './pages/NewDefinition.jsx';
 import Vision from './pages/Vision.jsx';
 import Observe from './pages/Observe.jsx';
-import Happenings from './pages/Happenings.jsx';
+import Happenings, { HappeningView } from './pages/Happenings.jsx';
+import Search from './pages/Search.jsx';
 import Library from './pages/Library.jsx';
 import Celebrate from './pages/Celebrate.jsx';
 import { DreamForm, DreamView, DreamsPage } from './pages/Dreams.jsx';
@@ -40,6 +41,8 @@ function App() {
             <Route path="vision" element={<Vision />} />
             <Route path="observe" element={<Observe />} />
             <Route path="happenings" element={<Happenings />} />
+            <Route path="happenings/:id" element={<HappeningView />} />
+            <Route path="search" element={<Search />} />
             <Route path="library" element={<Library />} />
             <Route path="depth" element={<Navigate to="/library" replace />} />
             <Route path="celebrate" element={<Celebrate />} />

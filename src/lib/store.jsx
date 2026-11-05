@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { backend, isDemo } from './backend.js';
 import {
   DEFAULT_CONTENT, DEFAULT_LABELS, SPACES, NAV_GROUPS, DREAM_LAYERS, STORY_KINDS, DECKS, FEEDBACK_TYPES,
-  IDEA_KINDS, LENSES, SPRINGS,
+  IDEA_KINDS, LENSES, SPRINGS, HAPPENING_KINDS,
 } from '../content/defaults.js';
 
 // null = עדיין נטען
@@ -63,8 +63,9 @@ function useLocalized(list, prefix, fields) {
 const F = {
   space: ['title', 'line', 'eyebrow'], layer: ['title', 'question'], story: ['title', 'text'], deck: ['title', 'text'],
   feedback: ['label', 'hint'], group: ['title', 'name'], kind: ['label', 'titleLabel', 'placeholder'],
-  lens: ['title', 'question'], spring: ['title', 'short', 'text'],
+  lens: ['title', 'question'], spring: ['title', 'short', 'text'], hkind: ['title', 'text', 'titleLabel'],
 };
+export const useHappeningKinds = () => useLocalized(HAPPENING_KINDS, 'hkind', F.hkind);
 export const useSpaces = () => useLocalized(SPACES, 'space', F.space);
 export const useNavGroups = () => useLocalized(NAV_GROUPS, 'group', F.group);
 export const useDreamLayers = () => useLocalized(DREAM_LAYERS, 'layer', F.layer);

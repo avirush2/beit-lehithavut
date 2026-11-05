@@ -11,9 +11,11 @@ function useKind() {
 import { nextHarvest } from '../lib/seasons.js';
 import Comments from '../components/Comments.jsx';
 import { HarvestBanner, Paths } from '../components/Layout.jsx';
-import { PageHead } from '../components/Botanical.jsx';
+import { Motif, PageHead } from '../components/Botanical.jsx';
+import { HappeningCards } from './Happenings.jsx';
+import { ReadingList } from './Library.jsx';
 import {
-  Byline, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Prose, formatDate,
+  Byline, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Prose, authorOf, formatDate,
 } from '../components/ui.jsx';
 
 export function CategoriesPage() {
@@ -32,7 +34,17 @@ export function CategoriesPage() {
       {share ? <p className="notice">באיזה אזור בגן זה צומח? בוחרים מרחב, ושם אפשר לשתף את ה{ideaKind(share).label}.</p> : null}
       <HarvestBanner />
       {categories == null ? <Loading /> : categories.length === 0 ? <Empty>עוד אין מרחבי חיים. מארחים יכולים לטעון את תוכן הפתיחה.</Empty> : (
-        <div className="cat-grid">
+        <>
+        <div className="cat-circle" style={{ '--n': categories.length }}>
+          <div className="cat-heart"><Motif kind="leaves" size={54} /><span>לב ההתהוות</span></div>
+          {categories.map((c, i) => (
+            <Link key={c.id} to={`/categories/${c.id}${share ? `?share=${share}` : ''}`} className="cat-node" title={c.description} style={{ '--i': i, '--cat': `var(--c${(i % 8) + 1})` }}>
+              <strong>{c.name}</strong>
+              {count(c.id) ? <span className="small">{count(c.id)} רעיונות</span> : null}
+            </Link>
+          ))}
+        </div>
+        <div className="cat-grid cat-grid-narrow">
           {categories.map((c, i) => (
             <Link key={c.id} to={`/categories/${c.id}${share ? `?share=${share}` : ''}`} className="cat-card" style={{ '--cat': `var(--c${(i % 8) + 1})` }}>
               <span className="cat-ring" aria-hidden="true">{c.name.replace(/[^֐-׿]/g, '').slice(0, 1)}</span>
@@ -42,6 +54,7 @@ export function CategoriesPage() {
             </Link>
           ))}
         </div>
+        </>
       )}
       <Paths keys={['happenings', 'library', 'dreams']} />
     </div>
@@ -126,6 +139,49 @@ function Harvests({ category }) {
   );
 }
 
+// מה שזורם אל המרחב מהכנפיים ומשאר הבית: חלומות, חישות, התרחשויות ומקורות שתויגו בו
+function Related({ id }) {
+  const { isHost } = useAuth();
+  const tagged = (items) => visibleFor(items, isHost)?.filter((x) => x.spaces?.includes(id)).sort(byNewest) || [];
+  const dreams = tagged(useCollection('dreams'));
+  const pain = tagged(useCollection('pain'));
+  const voices = tagged(useCollection('voices'));
+  const stories = tagged(useCollection('stories'));
+  const happenings = tagged(useCollection('happenings'));
+  const readings = (useCollection('readings') || []).filter((r) => r.spaces?.includes(id)).sort(byOrder);
+  const sensing = [
+    ...pain.map((p) => ({ id: p.id, kind: 'שיתוף קושי', text: p.body, to: `/threshold/${p.id}`, name: p.name })),
+    ...voices.map((v) => ({ id: v.id, kind: 'התבוננות', text: [v.dissolving && `מתמוסס: ${v.dissolving}`, v.emerging && `מתהווה: ${v.emerging}`].filter(Boolean).join(' · '), to: '/observe', name: v.name })),
+    ...stories.map((s) => ({ id: s.id, kind: 'חגיגה והשראה', text: s.title, to: '/celebrate', name: s.name })),
+  ];
+  if (!dreams.length && !sensing.length && !happenings.length && !readings.length) {
+    return <p className="muted small related-empty">כשחלומות, חישות, התרחשויות ומקורות יתויגו במרחב הזה – הם יופיעו כאן.</p>;
+  }
+  const cut = (s, n = 160) => (s && s.length > n ? `${s.slice(0, n)}…` : s);
+  return (
+    <div className="related">
+      {dreams.length ? (
+        <section className="section">
+          <h2>מכנף החלימה</h2>
+          <ul className="related-list">
+            {dreams.map((d) => <li key={d.id}><Link to={`/dreams/${d.id}`}><strong>{d.title}</strong></Link> <span className="muted small">· {authorOf(d)}</span><p className="small">{cut(d.body)}</p></li>)}
+          </ul>
+        </section>
+      ) : null}
+      {sensing.length ? (
+        <section className="section">
+          <h2>מכנף החישה</h2>
+          <ul className="related-list">
+            {sensing.map((s) => <li key={s.id}><span className="badge">{s.kind}</span> <Link to={s.to}>{cut(s.text)}</Link> <span className="muted small">· {s.name}</span></li>)}
+          </ul>
+        </section>
+      ) : null}
+      {happenings.length ? <section className="section"><h2>התרחשויות</h2><HappeningCards items={happenings} /></section> : null}
+      {readings.length ? <section className="section"><h2>מקורות להעמקה</h2><ReadingList items={readings} /></section> : null}
+    </div>
+  );
+}
+
 export function CategoryView() {
   const { id } = useParams();
   const { isHost, requireUser } = useAuth();
@@ -173,6 +229,7 @@ export function CategoryView() {
           </div>
         )}
       </section>
+      <Related id={id} />
       <Harvests category={category} />
     </div>
   );

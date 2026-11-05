@@ -9,7 +9,7 @@ import { Paths } from '../components/Layout.jsx';
 import { PageHead } from '../components/Botanical.jsx';
 import GardenScene from '../components/GardenScene.jsx';
 import {
-  Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, Loading, Modal, Prose, useCompass,
+  Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, LifeSpacePicker, Loading, Modal, Prose, SpaceBadges, authorOf, useCompass,
 } from '../components/ui.jsx';
 
 function DreamCards({ dreams }) {
@@ -20,7 +20,7 @@ function DreamCards({ dreams }) {
           <h3>{d.title}</h3>
           <p className="excerpt">{(d.body || '').slice(0, 180)}{(d.body || '').length > 180 ? '…' : ''}</p>
           {d.themes?.length ? <div className="badges">{d.themes.map((t) => <span key={t} className="badge">{t}</span>)}</div> : null}
-          <Byline name={d.name} createdAt={d.createdAt} hidden={d.hidden} />
+          <Byline name={authorOf(d)} createdAt={d.createdAt} hidden={d.hidden} />
         </Link>
       ))}
     </div>
@@ -88,6 +88,9 @@ export function DreamForm() {
   const [themes, setThemes] = useState([]);
   const [freeTheme, setFreeTheme] = useState('');
   const [marked, setMarked] = useState([]);
+  const [spaces, setSpaces] = useState([]);
+  const [asOrg, setAsOrg] = useState(false);
+  const [orgName, setOrgName] = useState('');
   const [busy, setBusy] = useState(false);
   const loaded = useRef(false);
 
@@ -96,6 +99,7 @@ export function DreamForm() {
       loaded.current = true;
       setTitle(existing.title || ''); setBody(existing.body || '');
       setThemes(existing.themes || []); setMarked(existing.compass || []);
+      setSpaces(existing.spaces || []); setAsOrg(!!existing.orgName); setOrgName(existing.orgName || '');
     }
   }, [existing]);
 
@@ -108,7 +112,7 @@ export function DreamForm() {
     if (!requireUser() || !title.trim() || !body.trim()) return;
     setBusy(true);
     try {
-      const data = { title: title.trim(), body: body.trim(), themes, compass: marked };
+      const data = { title: title.trim(), body: body.trim(), themes, compass: marked, spaces, orgName: asOrg ? orgName.trim() : '' };
       if (id) {
         await backend.update('dreams', id, data);
         navigate(`/dreams/${id}`);
@@ -127,10 +131,18 @@ export function DreamForm() {
 
   return (
     <div className="page">
-      <Link to="/dreams" className="back">→ החלום הרחב</Link>
+      <Link to="/dreams" className="back">→ שיתוף חלום</Link>
       <h1>{id ? 'עריכת החלום' : 'לשתף חלום'}</h1>
+      {id ? null : <p className="muted">צריכים עזרה להתחבר לחלימה? <Link to="/tickle">הנבעת חלום</Link> – קלפים ושאלות שפותחים את הדמיון.</p>}
       <div className="write-layout">
         <form className="card form" onSubmit={save}>
+          <div className="field"><span className="field-label">משתפים בשם…</span>
+            <div className="chips">
+              <button type="button" className={`chip ${asOrg ? '' : 'on'}`} aria-pressed={!asOrg} onClick={() => setAsOrg(false)}>עצמי</button>
+              <button type="button" className={`chip ${asOrg ? 'on' : ''}`} aria-pressed={asOrg} onClick={() => setAsOrg(true)}>ארגון או קהילה</button>
+            </div>
+            {asOrg ? <input className="org-name" value={orgName} onChange={(e) => setOrgName(e.target.value)} maxLength={80} placeholder="שם הארגון או הקהילה" /> : null}
+          </div>
           <label className="field"><span className="field-label">שם לחלום</span>
             <input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={90} placeholder="כמה מילים שמחזיקות אותו" />
           </label>
@@ -145,6 +157,7 @@ export function DreamForm() {
               <button type="button" className="btn btn-small btn-ghost" onClick={addFree}>הוספה</button>
             </div>
           </div>
+          <LifeSpacePicker value={spaces} onChange={setSpaces} label="באילו מרחבי חיים הוא נוגע? (לא חובה – כך הוא יופיע גם שם)" />
           <div className="field">
             <span className="field-label">נוגע במצפן? (לא חובה)</span>
             <CompassPicker value={marked} onChange={setMarked} />
@@ -257,7 +270,8 @@ export function DreamView() {
       <article className={`reading ${dream.hidden ? 'is-hidden' : ''}`}>
         {dream.themes?.length ? <div className="badges">{dream.themes.map((t) => <span key={t} className="badge">{t}</span>)}</div> : null}
         <h1>{dream.title}</h1>
-        <Byline name={dream.name} createdAt={dream.createdAt} hidden={dream.hidden} />
+        <Byline name={authorOf(dream)} createdAt={dream.createdAt} hidden={dream.hidden} />
+        <SpaceBadges ids={dream.spaces} />
         <div ref={bodyRef} className="selectable"><Prose text={dream.body} /></div>
         <CompassBadges list={dream.compass} />
         <ItemActions col="dreams" item={dream} onEdit={() => navigate(`/dreams/${id}/edit`)} onDeleted={() => navigate('/dreams')} />

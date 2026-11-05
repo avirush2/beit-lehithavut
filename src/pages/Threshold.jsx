@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useDoc, useT, byNewest, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
-import { Byline, Empty, ItemActions, Loading, Prose } from '../components/ui.jsx';
+import { Byline, Empty, ItemActions, LifeSpacePicker, Loading, Prose, SpaceBadges } from '../components/ui.jsx';
 import { PageHead } from '../components/Botanical.jsx';
 import { Paths } from '../components/Layout.jsx';
 
@@ -14,12 +14,13 @@ export function ThresholdPage() {
   const t = useT();
   const posts = visibleFor(useCollection('pain'), isHost)?.sort(byNewest);
   const [body, setBody] = useState('');
+  const [spaces, setSpaces] = useState([]);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!body.trim() || !requireUser()) return;
-    await backend.add('pain', { body: body.trim(), ...stamp() });
-    setBody('');
+    await backend.add('pain', { body: body.trim(), spaces, ...stamp() });
+    setBody(''); setSpaces([]);
   };
 
   return (
@@ -27,12 +28,14 @@ export function ThresholdPage() {
       <PageHead spaceKey="threshold" lead={intro} deep={deep} />
       <form className="card form" onSubmit={submit}>
         <textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder={t('pain-placeholder')} />
+        <LifeSpacePicker key={posts?.length} value={spaces} onChange={setSpaces} collapsible />
         <div className="row-end"><button className="btn" disabled={!body.trim()}>{t('pain-send')}</button></div>
       </form>
       <section className="section">
         {posts == null ? <Loading /> : posts.length === 0 ? <Empty>שקט כאן כרגע.</Empty> : posts.map((p) => (
           <Link key={p.id} to={`/threshold/${p.id}`} className={`card pain-card ${p.hidden ? 'is-hidden' : ''}`}>
             <p>{p.body.length > 260 ? `${p.body.slice(0, 260)}…` : p.body}</p>
+            <SpaceBadges ids={p.spaces} />
             <Byline name={p.name} createdAt={p.createdAt} hidden={p.hidden} />
           </Link>
         ))}
@@ -55,9 +58,10 @@ export function ThresholdPost() {
   }
   return (
     <div className="page threshold">
-      <Link to="/threshold" className="back">→ מהתפר</Link>
+      <Link to="/threshold" className="back">→ שיתוף קושי</Link>
       <article className="reading">
         <Prose text={post.body} />
+        <SpaceBadges ids={post.spaces} />
         <Byline name={post.name} createdAt={post.createdAt} hidden={post.hidden} />
         <ItemActions col="pain" item={post} onDeleted={() => navigate('/threshold')} />
       </article>

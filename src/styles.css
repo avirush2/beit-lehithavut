@@ -424,6 +424,58 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .garden-caption { text-align: center; font-size: .88rem; color: var(--muted); padding: .4rem; min-height: 2.2em; }
 
 /* categories */
+/* מרחבי החיים במעגל, ובמרכזו לב ההתהוות */
+.cat-circle { position: relative; width: min(640px, 100%); aspect-ratio: 1; margin: 1rem auto 2rem; container-type: inline-size; --r: 37cqw; }
+.cat-circle::before { content: ""; position: absolute; inset: 13cqw; border-radius: 50%; border: 1.5px dashed color-mix(in srgb, var(--sage-ink) 40%, transparent); }
+.cat-heart {
+  position: absolute; left: 50%; top: 50%; width: 30cqw; height: 30cqw; transform: translate(-50%, -50%); border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; text-align: center;
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--sun) 55%, var(--surface)), color-mix(in srgb, var(--sage) 60%, var(--surface)));
+  font-family: "Amatic SC", var(--display); font-weight: 700; font-size: clamp(1.3rem, 4.4cqw, 1.9rem); color: var(--sage-ink);
+}
+.cat-node {
+  position: absolute; left: 50%; top: 50%; width: 22cqw; height: 22cqw; margin: -11cqw;
+  transform: rotate(calc(360deg / var(--n) * var(--i))) translateY(calc(-1 * var(--r))) rotate(calc(-360deg / var(--n) * var(--i)));
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: .4rem; border-radius: 50%;
+  background: color-mix(in srgb, var(--cat) 16%, var(--surface)); border: 1.5px solid color-mix(in srgb, var(--cat) 55%, transparent);
+  color: var(--fg); text-decoration: none; transition: background .2s;
+}
+.cat-node:hover { background: color-mix(in srgb, var(--cat) 30%, var(--surface)); }
+.cat-node strong { font-family: var(--display); font-weight: 500; font-size: clamp(.9rem, 3cqw, 1.15rem); line-height: 1.2; }
+.cat-node span { color: var(--muted); font-size: .75rem; }
+.cat-grid-narrow { display: none; }
+@media (max-width: 640px) {
+  .cat-circle { display: none; }
+  .cat-grid-narrow { display: grid; }
+}
+.related-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.related-list li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: .7rem 1rem; }
+.related-list p { margin: .3rem 0 0; color: var(--muted); }
+.related-empty { margin: 2rem 0; }
+.space-badge { background: color-mix(in srgb, var(--sage) 45%, var(--surface)); color: var(--fg); }
+.org-name { margin-top: .5rem; max-width: 360px; }
+.voices-spaces { margin: -.6rem 0 1.2rem; }
+/* התרחשות */
+.happening-form .happening-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 1rem; }
+.happening-meta { margin: .4rem 0 .6rem; display: grid; gap: .2rem; }
+.happening-meta div { display: flex; gap: .5rem; font-size: .92rem; }
+.happening-meta dt { color: var(--muted); font-family: var(--label); font-size: .8rem; min-width: 5.5em; }
+.happening-meta dd { margin: 0; }
+.happening-card .badge { align-self: flex-start; }
+.kind-filter { margin-bottom: 1rem; }
+.host-actions { margin-top: .6rem; }
+/* חיפוש */
+.search-input { font-size: 1.1rem; padding: .6em .9em; margin-bottom: .8rem; }
+.search-spaces { margin-bottom: 1.2rem; }
+.inbox-filters { margin-bottom: 1rem; }
+/* ספריה */
+.filters { display: grid; gap: .4rem; margin-bottom: 1.2rem; }
+.small-chips .chip { font-size: .78rem; }
+.reading-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.reading-item { margin: 0; }
+.reading-item h3 { margin-bottom: .2rem; }
+.springs-list { padding-inline-start: 1.2em; }
+.springs-list li { margin-bottom: .5rem; }
 .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
 .cat-card {
   display: block; padding: 1.3rem; border-radius: var(--organic);
