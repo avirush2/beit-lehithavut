@@ -62,7 +62,7 @@ function useLocalized(list, prefix, fields) {
 }
 const F = {
   space: ['title'], layer: ['title', 'question'], story: ['title', 'text'], deck: ['title', 'text'],
-  feedback: ['label', 'hint'], group: ['title'], kind: ['label', 'titleLabel', 'placeholder'],
+  feedback: ['label', 'hint'], group: ['title', 'hint'], kind: ['label', 'titleLabel', 'placeholder'],
   lens: ['title', 'question'], spring: ['title', 'short', 'text'], hkind: ['title', 'text', 'titleLabel'],
 };
 export const useHappeningKinds = () => useLocalized(HAPPENING_KINDS, 'hkind', F.hkind);

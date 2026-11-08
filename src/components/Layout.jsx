@@ -98,10 +98,15 @@ function MainNav() {
   return (
     <nav className="site-nav" aria-label="ניווט ראשי">
       <div className="nav-row">
-        <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>{t('nav-home')}</NavLink>
-        {groups.map((g) => (g.together
-          ? <button key={g.key} type="button" onClick={() => openIdea()}>{g.title}</button>
-          : <Link key={g.key} to={g.to} className={current?.key === g.key ? 'active' : ''}>{g.title}</Link>))}
+        <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
+          <span className="nav-title">{t('nav-home')}</span><span className="nav-hint">{t('nav-home-hint')}</span>
+        </NavLink>
+        {groups.map((g) => {
+          const label = <><span className="nav-title">{g.title}</span>{g.hint ? <span className="nav-hint">{g.hint}</span> : null}</>;
+          return g.together
+            ? <button key={g.key} type="button" onClick={() => openIdea()}>{label}</button>
+            : <Link key={g.key} to={g.to} className={current?.key === g.key ? 'active' : ''}>{label}</Link>;
+        })}
       </div>
     </nav>
   );

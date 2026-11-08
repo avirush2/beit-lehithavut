@@ -80,7 +80,7 @@ export default function Tickle() {
             <span className="deck-stack" aria-hidden="true"><i /><i /><i /></span>
             <span className="deck-title">{d.title}</span>
             <span className="deck-text">{d.text}</span>
-            <span className="deck-cta">לשלוף קלף</span>
+            <span className="deck-cta">לשלוף קלף ←</span>
           </button>
         ))}
       </section>

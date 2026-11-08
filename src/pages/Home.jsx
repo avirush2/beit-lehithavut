@@ -3,7 +3,35 @@ import { useCollection, useContent, useSettings, useT, byNewest } from '../lib/s
 import { HarvestBanner } from '../components/Layout.jsx';
 import GardenScene from '../components/GardenScene.jsx';
 import { Prose } from '../components/ui.jsx';
+import { Motif } from '../components/Botanical.jsx';
 import { SITE } from '../content/defaults.js';
+
+// שלוש דלתות: מה אפשר לעשות כאן, במילים פשוטות. הטקסטים נערכים בניהול ← תוויות ← שער הכניסה.
+const DOORS = [
+  { key: 'dreams', to: '/dreams', tone: 'blossom', motif: 'flower' },
+  { key: 'observe', to: '/observe', tone: 'peach', motif: 'horizon' },
+  { key: 'categories', to: '/categories', tone: 'sage', motif: 'leaves' },
+];
+
+function Doors() {
+  const t = useT();
+  return (
+    <section className="doors" aria-labelledby="doors-title">
+      <h2 id="doors-title" className="doors-title">{t('doors-title')}</h2>
+      <div className="doors-row">
+        {DOORS.map((d) => (
+          <Link key={d.key} to={d.to} className={`door tone-${d.tone}`}>
+            <Motif kind={d.motif} size={44} />
+            <strong>{t(`door-${d.key}-title`)}</strong>
+            <span className="door-text">{t(`door-${d.key}-text`)}</span>
+            <span className="door-hint">{t(`door-${d.key}-hint`)} ←</span>
+          </Link>
+        ))}
+      </div>
+      <Prose text={t('doors-after')} className="doors-after" />
+    </section>
+  );
+}
 
 // מה צומח עכשיו: מה שהצטרף לאחרונה – חלומות, רעיונות ושיתופי השראה. מוצג רק אם הופעל בהגדרות.
 function Growing() {
@@ -34,7 +62,7 @@ function Growing() {
 }
 
 export default function Home() {
-  const welcome = useContent('welcomeBody');
+  const welcome = useContent('welcomeShort');
   const settings = useSettings();
   const t = useT();
 
@@ -46,6 +74,7 @@ export default function Home() {
           <h1>{SITE.name}</h1>
           <p className="gate-tag">{t('site-tagline')}</p>
           <Prose text={welcome} className="gate-text" />
+          <Doors />
         </div>
         <GardenScene className="gate-scene" />
       </section>

@@ -1,48 +1,9 @@
-import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { backend } from '../lib/backend.js';
-import { useAuth, useCollection, useContent, useDoc, useT, byNewest, visibleFor } from '../lib/store.jsx';
+import { useAuth, useDoc, useT } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
-import { Byline, Empty, ItemActions, LifeSpacePicker, Loading, Prose, SpaceBadges } from '../components/ui.jsx';
-import { GroupHead } from '../components/Botanical.jsx';
+import { Byline, Empty, ItemActions, Loading, Prose, SpaceBadges } from '../components/ui.jsx';
 
-export function ThresholdPage() {
-  const { isHost, requireUser, stamp } = useAuth();
-  const intro = useContent('painIntro');
-  const t = useT();
-  const posts = visibleFor(useCollection('pain'), isHost)?.sort(byNewest);
-  const [body, setBody] = useState('');
-  const [spaces, setSpaces] = useState([]);
-
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!body.trim() || !requireUser()) return;
-    await backend.add('pain', { body: body.trim(), spaces, ...stamp() });
-    setBody(''); setSpaces([]);
-  };
-
-  return (
-    <div className="page threshold">
-      <GroupHead group="sensing" current="threshold" />
-      <Prose text={intro} className="sub-lead" />
-      <form className="card form" onSubmit={submit}>
-        <textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder={t('pain-placeholder')} />
-        <LifeSpacePicker key={posts?.length} value={spaces} onChange={setSpaces} collapsible />
-        <div className="row-end"><button className="btn" disabled={!body.trim()}>{t('pain-send')}</button></div>
-      </form>
-      <section className="section">
-        {posts == null ? <Loading /> : posts.length === 0 ? <Empty>שקט כאן כרגע.</Empty> : posts.map((p) => (
-          <Link key={p.id} to={`/threshold/${p.id}`} className={`card pain-card ${p.hidden ? 'is-hidden' : ''}`}>
-            <p>{p.body.length > 260 ? `${p.body.slice(0, 260)}…` : p.body}</p>
-            <SpaceBadges ids={p.spaces} />
-            <Byline name={p.name} createdAt={p.createdAt} hidden={p.hidden} />
-          </Link>
-        ))}
-      </section>
-    </div>
-  );
-}
-
+// שיתוף קושי ישן, עם ההקשבה שנכתבה עליו. שיתופים חדשים נכתבים ב"מה מתמוסס" (חישה), והרשימה מוצגת שם.
 export function ThresholdPost() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -52,22 +13,22 @@ export function ThresholdPost() {
   const PROMPT = t('pain-prompt');
   if (post === undefined) return <div className="page"><Loading /></div>;
   if (post === null || (post.hidden && !isHost && post.uid !== user?.uid)) {
-    return <div className="page"><Empty>לא נמצא. <Link to="/threshold">חזרה</Link></Empty></div>;
+    return <div className="page"><Empty>לא נמצא. <Link to="/observe">חזרה</Link></Empty></div>;
   }
   return (
-    <div className="page threshold">
-      <Link to="/threshold" className="back">→ שיתוף קושי</Link>
+    <div className="page">
+      <Link to="/observe" className="back">→ מה מתמוסס</Link>
       <article className="reading">
         <Prose text={post.body} />
         <SpaceBadges ids={post.spaces} />
         <Byline name={post.name} createdAt={post.createdAt} hidden={post.hidden} />
-        <ItemActions col="pain" item={post} onDeleted={() => navigate('/threshold')} />
+        <ItemActions col="pain" item={post} onDeleted={() => navigate('/observe')} />
       </article>
       <section className="section">
         <h2>הקשבה</h2>
         <Comments targetType="pain" targetId={id} prompt={PROMPT} placeholder={PROMPT} />
       </section>
-      <div className="card turn-to-dream">
+      <div className="invite tone-blossom invite-small">
         <p>ואם מתוך הכאב הזה מבקש לצמוח חלום – אפשר לשתף אותו בחלימה.</p>
         <button type="button" className="btn btn-ghost" onClick={() => requireUser() && navigate('/dreams/new', { state: { draft: '', fromPain: id } })}>להפוך לזרע חלום</button>
       </div>

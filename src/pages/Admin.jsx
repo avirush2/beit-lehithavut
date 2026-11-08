@@ -10,7 +10,7 @@ import { HappeningForm, useKindOf } from './Happenings.jsx';
 import { FEEDBACK_TYPES, LABEL_GROUPS, DEFAULT_LABELS } from '../content/defaults.js';
 
 const TEXTS = [
-  ['welcomeBody', 'שער הכניסה – טקסט הפתיחה'],
+  ['welcomeShort', 'שער הכניסה – טקסט הפתיחה (מעל שלוש הדלתות)'],
   ['growingQuestion', 'שער הכניסה – כותרת "מה צומח עכשיו" (מוצג רק אם הופעל בהגדרות)'],
   ['mapDreaming', 'חלימה – פתיח העמוד'],
   ['tickleIntro', 'חלימה ← הנבעת חלום – פתיח קצר'],
@@ -20,9 +20,8 @@ const TEXTS = [
   ['depthIntro', 'התהוות ← ספריה – פתיח קצר'],
   ['assumptions', 'התהוות ← ספריה – נקודות הנחה'],
   ['mapSensing', 'חישה – פתיח העמוד'],
-  ['observeIntro', 'חישה ← התבוננות – תחילת ההזמנה (לפני השאלות; השאלות עצמן ב"תוויות" ← התבוננות)'],
-  ['voicesIntro', 'חישה ← התבוננות – סוף ההזמנה (אחרי השאלות)'],
-  ['painIntro', 'חישה ← שיתוף קושי – פתיח קצר'],
+  ['observeIntro', 'חישה ← מה מתמוסס – תחילת ההזמנה (לפני השאלה; השאלה עצמה ב"תוויות" ← מה מתמוסס)'],
+  ['voicesIntro', 'חישה ← מה מתמוסס – סוף ההזמנה (אחרי השאלה)'],
   ['celebrateIntro', 'חישה ← חגיגה והשראה – פתיח קצר'],
   ['gideiBayit', 'חישה ← חגיגה והשראה – כרטיס גידולי בית'],
   ['mapAbout', 'אודות – פתיח העמוד'],

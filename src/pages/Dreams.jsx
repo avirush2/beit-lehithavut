@@ -4,7 +4,6 @@ import { backend } from '../lib/backend.js';
 import { useAuth, useCollection, useContent, useDoc, useT, byNewest, byOrder, visibleFor } from '../lib/store.jsx';
 import Comments from '../components/Comments.jsx';
 import { GroupHead } from '../components/Botanical.jsx';
-import GardenScene from '../components/GardenScene.jsx';
 import Tickle from './Tickle.jsx';
 import {
   Byline, Chips, CompassBadges, CompassPicker, Empty, ItemActions, LifeSpacePicker, Loading, Modal, Prose, SpaceBadges, authorOf, useCompass,
@@ -34,11 +33,8 @@ export function DreamsPage() {
 
   return (
     <div className="page">
-      <div className="space-scene tone-blossom">
-        <GardenScene height={200} flowers={30} seed={11} />
-      </div>
       <GroupHead group="dreaming" current="dreams">
-        <button type="button" className="btn btn-bloom" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
+        <button type="button" className="btn" onClick={() => requireUser() && navigate('/dreams/new')}>{t('dreams-add')}</button>
       </GroupHead>
 
       <section className="section" id="dreams">

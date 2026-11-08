@@ -14,8 +14,7 @@ import Library from './pages/Library.jsx';
 import Celebrate from './pages/Celebrate.jsx';
 import { DreamForm, DreamView, DreamsPage } from './pages/Dreams.jsx';
 import { CategoriesPage, CategoryView, IdeaView } from './pages/Categories.jsx';
-import { ThresholdPage, ThresholdPost } from './pages/Threshold.jsx';
-import Admin from './pages/Admin.jsx';
+import { ThresholdPost } from './pages/Threshold.jsx';import Admin from './pages/Admin.jsx';
 import { Empty } from './components/ui.jsx';
 import './styles.css';
 
@@ -55,8 +54,7 @@ function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="categories/:id" element={<CategoryView />} />
             <Route path="ideas/:id" element={<IdeaView />} />
-            <Route path="threshold" element={<ThresholdPage />} />
-            <Route path="threshold/:id" element={<ThresholdPost />} />
+            <Route path="threshold" element={<Navigate to="/observe" replace />} />            <Route path="threshold/:id" element={<ThresholdPost />} />
             <Route path="admin" element={<Admin />} />
             <Route path="*" element={<div className="page"><Empty>הדף הזה עוד לא התהווה.</Empty></div>} />
           </Route>
