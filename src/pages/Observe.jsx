@@ -12,7 +12,7 @@ function Voices() {
   const lead = useContent('observeIntro');
   const after = useContent('voicesIntro');
   const t = useT();
-  const voices = visibleFor(useCollection('voices'), isHost);
+  const voices = visibleFor(useCollection('voices'), isHost)?.filter((v) => v.kind !== 'free');
   const pains = visibleFor(useCollection('pain'), isHost);
   const items = voices && pains
     ? [...voices.map((v) => ({ ...v, col: 'voices' })), ...pains.map((p) => ({ ...p, col: 'pain' }))].sort(byNewest).slice(0, 36)
@@ -72,6 +72,57 @@ function Voices() {
         </ul>
       ) : null}
     </section>
+  );
+}
+
+// חישה ← שיתוף חופשי: אותו כרטיס הזמנה, בלי נושא מוגדר. נשמר בקולות עם kind: 'free'.
+export function FreeShare() {
+  const { isHost, requireUser, stamp } = useAuth();
+  const t = useT();
+  const items = visibleFor(useCollection('voices'), isHost)?.filter((v) => v.kind === 'free').sort(byNewest);
+  const [text, setText] = useState('');
+  const [spaces, setSpaces] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(0);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!text.trim() || !requireUser()) return;
+    setBusy(true);
+    try {
+      await backend.add('voices', { kind: 'free', text: text.trim(), spaces, ...stamp() });
+      setText(''); setSpaces([]); setSent(sent + 1);
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="page">
+      <GroupHead group="sensing" current="free" />
+      <section className="section">
+        <form className="invite tone-lilac" onSubmit={submit}>
+          <p className="invite-lead">{t('free-lead')}</p>
+          <label className="invite-q" htmlFor="free-text">{t('free-question')}</label>
+          <textarea id="free-text" rows={5} value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} />
+          <p className="invite-after">{t('free-after')}</p>
+          <LifeSpacePicker key={sent} value={spaces} onChange={setSpaces} collapsible />
+          <div className="row-end"><button className="btn" disabled={busy || !text.trim()}>{t('free-send')}</button></div>
+        </form>
+        {items?.length ? (
+          <ul className="shares">
+            {items.map((v) => (
+              <li key={v.id} className={`share ${v.hidden ? 'is-hidden' : ''}`}>
+                <Prose text={v.text} />
+                <SpaceBadges ids={v.spaces} />
+                <div className="comment-foot">
+                  <span className="muted small">{v.name}</span>
+                  <ItemActions col="voices" item={v} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+    </div>
   );
 }
 

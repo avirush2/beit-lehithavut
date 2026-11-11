@@ -15,15 +15,32 @@ import { GroupHead } from '../components/Botanical.jsx';
 import { HappeningCard, HappeningForm } from './Happenings.jsx';
 import { ReadingList } from './Library.jsx';
 import {
-  Byline, CompassBadges, Empty, ItemActions, Loading, Modal, Prose, authorOf, formatDate,
+  Byline, CompassBadges, Empty, ItemActions, LifeSpacePicker, Loading, Modal, Prose, SpaceBadges, authorOf, formatDate,
 } from '../components/ui.jsx';
+
+// רעיון שייך למרחב שבו נכתב, ולכל מרחב נוסף שתויג בו – החיים לא מחולקים למגירות
+const inSpace = (idea, id) => idea.categoryId === id || idea.spaces?.includes(id);
 
 // כמה צומח בכל מרחב: רעיונות, שאלות והתרחשויות שתויגו בו
 function useGrowingCount() {
   const ideas = useCollection('ideas') || [];
   const happenings = useCollection('happenings') || [];
-  return (id) => ideas.filter((i) => i.categoryId === id && !i.hidden).length
+  return (id) => ideas.filter((i) => inSpace(i, id) && !i.hidden).length
     + happenings.filter((h) => h.spaces?.includes(id) && !h.hidden).length;
+}
+
+// השער למרחב: שאלת הפתיחה, והשבילים שיכולים להתפתח בו (בשקט, בלי עומס)
+function SpaceGate({ category }) {
+  const paths = (category.subtopics || '').split('·').map((s) => s.trim()).filter(Boolean);
+  return (
+    <header className="space-gate invite tone-sage">
+      <p className="eyebrow">מרחב חיים</p>
+      <h1>{category.emoji ? <span className="gate-emoji" aria-hidden="true">{category.emoji}</span> : null}{category.name}</h1>
+      {category.description ? <p className="gate-context">{category.description}</p> : null}
+      {category.question ? <p className="gate-question">{category.question}</p> : null}
+      {paths.length ? <p className="gate-paths"><span>שבילים שיכולים להתפתח כאן:</span> {paths.join(' · ')}</p> : null}
+    </header>
+  );
 }
 
 export function CategoriesPage() {
@@ -44,7 +61,8 @@ export function CategoriesPage() {
         <>
         <div className="cat-circle" style={{ '--n': categories.length }}>
           {categories.map((c, i) => (
-            <Link key={c.id} to={`/categories/${c.id}${share ? `?share=${share}` : ''}`} className="cat-node" title={c.description} style={{ '--i': i, '--cat': `var(--c${(i % 8) + 1})` }}>
+            <Link key={c.id} to={`/categories/${c.id}${share ? `?share=${share}` : ''}`} className="cat-node" title={c.question || c.description} style={{ '--i': i, '--cat': `var(--c${(i % 8) + 1})` }}>
+              {c.emoji ? <span className="node-emoji" aria-hidden="true">{c.emoji}</span> : null}
               <strong>{c.name}</strong>
               {count(c.id) ? <span className="small">{count(c.id)} צומחים</span> : null}
             </Link>
@@ -53,9 +71,9 @@ export function CategoriesPage() {
         <div className="cat-grid cat-grid-narrow">
           {categories.map((c, i) => (
             <Link key={c.id} to={`/categories/${c.id}${share ? `?share=${share}` : ''}`} className="cat-card" style={{ '--cat': `var(--c${(i % 8) + 1})` }}>
-              <span className="cat-ring" aria-hidden="true">{c.name.replace(/[^֐-׿]/g, '').slice(0, 1)}</span>
+              <span className="cat-ring" aria-hidden="true">{c.emoji || c.name.replace(/[^֐-׿]/g, '').slice(0, 1)}</span>
               <h2>{c.name}</h2>
-              <p>{c.description}</p>
+              <p>{c.question || c.description}</p>
               <span className="muted small">{count(c.id) ? `${count(c.id)} צומחים כאן` : 'עוד שקט כאן'}</span>
             </Link>
           ))}
@@ -72,6 +90,8 @@ function IdeaForm({ categoryId, idea, initialKind, onDone }) {
   const [kind, setKind] = useState(idea?.kind || initialKind || 'idea');
   const [title, setTitle] = useState(idea?.title || '');
   const [body, setBody] = useState(idea?.body || '');
+  // מרחבים נוספים שהרעיון נוגע בהם (המרחב שבו נכתב תמיד נשמר)
+  const [spaces, setSpaces] = useState((idea?.spaces || []).filter((s) => s !== categoryId));
   const compass = idea?.compass || []; // בחירת המצפן הוסרה מהטופס; מה שכבר נבחר נשמר
   const ALL_KINDS = useIdeaKinds();
   // "התנסות או יוזמה" עבר לטופס ההתרחשות – מוצג רק כשעורכים משהו שכבר נכתב כך
@@ -80,7 +100,7 @@ function IdeaForm({ categoryId, idea, initialKind, onDone }) {
   const save = async (e) => {
     e.preventDefault();
     if (!requireUser() || !title.trim()) return;
-    const data = { kind, title: title.trim(), body: body.trim(), compass };
+    const data = { kind, title: title.trim(), body: body.trim(), compass, spaces: [categoryId, ...spaces.filter((s) => s !== categoryId)] };
     if (idea) { await backend.update('ideas', idea.id, data); onDone(); return; }
     const id = await backend.add('ideas', { ...data, categoryId, ...stamp() });
     onDone();
@@ -99,6 +119,7 @@ function IdeaForm({ categoryId, idea, initialKind, onDone }) {
       <label className="field"><span className="field-label">פירוט</span>
         <textarea rows={6} value={body} onChange={(e) => setBody(e.target.value)} placeholder={k.placeholder} />
       </label>
+      <LifeSpacePicker value={spaces} onChange={setSpaces} label="נוגע גם במרחבים נוספים? (לא חובה)" collapsible />
       <div className="row-end">
         <button type="button" className="btn btn-ghost" onClick={onDone}>ביטול</button>
         <button className="btn" disabled={!title.trim()}>{idea ? 'שמירה' : 'לשתף'}</button>
@@ -156,7 +177,9 @@ function Related({ id }) {
   const readings = (useCollection('readings') || []).filter((r) => r.spaces?.includes(id)).sort(byOrder);
   const sensing = [
     ...pain.map((p) => ({ id: p.id, kind: 'שיתוף קושי', text: p.body, to: `/threshold/${p.id}`, name: p.name })),
-    ...voices.map((v) => ({ id: v.id, kind: 'התבוננות', text: [v.dissolving && `מתמוסס: ${v.dissolving}`, v.emerging && `מתהווה: ${v.emerging}`].filter(Boolean).join(' · '), to: '/observe', name: v.name })),
+    ...voices.map((v) => (v.kind === 'free'
+      ? { id: v.id, kind: 'שיתוף חופשי', text: v.text, to: '/free', name: v.name }
+      : { id: v.id, kind: 'מה מתמוסס', text: [v.dissolving, v.emerging && `מתהווה: ${v.emerging}`].filter(Boolean).join(' · '), to: '/observe', name: v.name })),
     ...stories.map((s) => ({ id: s.id, kind: 'חגיגה והשראה', text: s.title, to: '/celebrate', name: s.name })),
   ];
   if (!dreams.length && !sensing.length && !readings.length) {
@@ -192,7 +215,7 @@ export function CategoryView() {
   const [params] = useSearchParams();
   const share = params.get('share');
   const category = useDoc('categories', id);
-  const ideas = visibleFor(useCollection('ideas', ['categoryId', id]), isHost);
+  const ideas = visibleFor(useCollection('ideas'), isHost)?.filter((i) => inSpace(i, id));
   const happenings = visibleFor(useCollection('happenings'), isHost)?.filter((h) => h.spaces?.includes(id));
   const comments = useCollection('comments') || [];
   const [adding, setAdding] = useState(share || null); // סוג הרעיון שכותבים עכשיו
@@ -217,11 +240,7 @@ export function CategoryView() {
   return (
     <div className="page">
       <Link to="/categories" className="back">→ מרחבי החיים</Link>
-      <header className="page-head">
-        <p className="eyebrow">מרחב חיים</p>
-        <h1>{category.name}</h1>
-        <p className="lead">{category.description}</p>
-      </header>
+      <SpaceGate category={category} />
       {adding ? <IdeaForm categoryId={id} initialKind={adding} onDone={() => setAdding(null)} /> : choosing ? (
         <div className="card bring">
           <p className="field-label">מה מביאים למרחב?</p>
@@ -303,6 +322,7 @@ export function IdeaView() {
             </div>
           ) : null}
           <Prose text={idea.body} />
+          <SpaceBadges ids={idea.spaces} />
           <CompassBadges list={idea.compass} />
           <ItemActions col="ideas" item={idea} onEdit={() => setEditing(true)} onDeleted={() => navigate(`/categories/${idea.categoryId}`)} />
         </article>

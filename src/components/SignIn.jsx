@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { backend, isDemo } from '../lib/backend.js';
 import { useAuth } from '../lib/store.jsx';
 import { Modal } from './ui.jsx';
@@ -10,6 +10,33 @@ const ERRORS = {
   'auth/invalid-email': 'האימייל לא תקין.',
   'auth/popup-closed-by-user': 'החלון נסגר לפני שההתחברות הסתיימה.',
 };
+
+// "איך לקרוא לך במרחב?" – נפתח בכניסה הראשונה, ובלחיצה על "שלום, …" בראש העמוד
+export function NameChooser() {
+  const { nameOpen, closeName, saveName, name } = useAuth();
+  const [value, setValue] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => { if (nameOpen) { setValue(name); setError(''); } }, [nameOpen, name]);
+  const save = async (e) => {
+    e.preventDefault();
+    setBusy(true); setError('');
+    try { await saveName(value); closeName(); } catch (err) { console.error(err); setError('לא הצלחנו לשמור. אפשר לנסות שוב.'); } finally { setBusy(false); }
+  };
+  return (
+    <Modal open={nameOpen} onClose={closeName} title="איך לקרוא לך במרחב?">
+      <form onSubmit={save}>
+        <p className="muted">השם הזה יופיע ליד מה שתשתפו. אפשר שם פרטי, שם מלא או כינוי – ולשנות אותו מתי שרוצים, בלחיצה על השם בראש העמוד.</p>
+        <label className="field"><span className="field-label">השם שלך במרחב</span>
+          <input value={value} onChange={(e) => setValue(e.target.value)} maxLength={60} required autoFocus />
+        </label>
+        <p className="muted small">שיתופים שכבר נכתבו ממשיכים להופיע עם השם שהיה אז.</p>
+        {error ? <p className="error">{error}</p> : null}
+        <div className="row-end"><button className="btn" disabled={busy || !value.trim()}>שמירה</button></div>
+      </form>
+    </Modal>
+  );
+}
 
 export default function SignIn() {
   const { signInOpen, closeSignIn } = useAuth();
@@ -36,7 +63,7 @@ export default function SignIn() {
 
   const signUp = () => run(async () => {
     const u = await backend.signUpEmail(name.trim(), email.trim(), password);
-    await backend.set('users', u.uid, { displayName: name.trim(), role: 'member', createdAt: Date.now() });
+    await backend.set('users', u.uid, { displayName: name.trim(), nameChosen: true, role: 'member', createdAt: Date.now() });
   });
 
   return (

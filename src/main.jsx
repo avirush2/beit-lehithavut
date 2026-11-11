@@ -7,7 +7,7 @@ import { seedMissing } from './lib/seed.js';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
-import Observe from './pages/Observe.jsx';
+import Observe, { FreeShare } from './pages/Observe.jsx';
 import { HappeningView } from './pages/Happenings.jsx';
 import Search from './pages/Search.jsx';
 import Library from './pages/Library.jsx';
@@ -54,7 +54,8 @@ function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="categories/:id" element={<CategoryView />} />
             <Route path="ideas/:id" element={<IdeaView />} />
-            <Route path="threshold" element={<Navigate to="/observe" replace />} />            <Route path="threshold/:id" element={<ThresholdPost />} />
+            <Route path="threshold" element={<Navigate to="/observe" replace />} />
+            <Route path="free" element={<FreeShare />} />            <Route path="threshold/:id" element={<ThresholdPost />} />
             <Route path="admin" element={<Admin />} />
             <Route path="*" element={<div className="page"><Empty>הדף הזה עוד לא התהווה.</Empty></div>} />
           </Route>

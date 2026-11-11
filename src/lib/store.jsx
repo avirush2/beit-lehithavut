@@ -85,14 +85,17 @@ const AuthCtx = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined);
   const [signInOpen, setSignInOpen] = useState(false);
+  const [nameOpen, setNameOpen] = useState(false);
+  const [nameAsked, setNameAsked] = useState(false);
   useEffect(() => backend.onAuth(setUser), []);
 
   const profile = useDoc(user ? 'users' : null, user?.uid);
   const owner = useDoc('meta', 'owner');
 
-  // יצירת פרופיל בפעם הראשונה שמשתתפ.ת נכנס.ת
+  // יצירת פרופיל בפעם הראשונה שמשתתפ.ת נכנס.ת (למשל עם Google). בהרשמה באימייל הפרופיל נוצר בטופס עצמו,
+  // ולכן כאן מחכים לשם – כדי לא לדרוס את השם שנבחר בשם האוטומטי מהאימייל.
   useEffect(() => {
-    if (user && profile === null) {
+    if (user && profile === null && user.displayName) {
       backend.set('users', user.uid, {
         displayName: user.displayName || 'משתתפ.ת',
         role: 'member',
@@ -104,6 +107,21 @@ export function AuthProvider({ children }) {
   const isAdmin = !!user && (isDemo || owner?.uid === user.uid || profile?.role === 'admin');
   const isHost = isAdmin || profile?.role === 'host';
   const name = profile?.displayName || user?.displayName || '';
+
+  // בכניסה הראשונה (וגם למי שכבר רשום.ה ועוד לא בחר.ה): "איך לקרוא לך במרחב?" – פעם אחת
+  useEffect(() => {
+    if (!isDemo && user && profile !== undefined && !profile?.nameChosen && !signInOpen && !nameAsked) {
+      setNameAsked(true);
+      setNameOpen(true);
+    }
+  }, [user, profile, signInOpen, nameAsked]);
+
+  const saveName = useCallback(async (next) => {
+    const displayName = next.trim();
+    if (!user || !displayName) return;
+    if (profile) await backend.update('users', user.uid, { displayName, nameChosen: true });
+    else await backend.set('users', user.uid, { displayName, nameChosen: true, role: 'member', createdAt: Date.now() });
+  }, [user, profile]);
 
   const requireUser = useCallback(() => {
     if (user) return true;
@@ -121,10 +139,14 @@ export function AuthProvider({ children }) {
     signInOpen,
     openSignIn: () => setSignInOpen(true),
     closeSignIn: () => setSignInOpen(false),
+    nameOpen,
+    openName: () => setNameOpen(true),
+    closeName: () => setNameOpen(false),
+    saveName,
     requireUser,
     // שדות שכל פוסט של משתתפ.ת נושא
     stamp: () => ({ uid: user?.uid, name }),
-  }), [user, name, isAdmin, isHost, owner, signInOpen, requireUser]);
+  }), [user, name, isAdmin, isHost, owner, signInOpen, nameOpen, saveName, requireUser]);
 
   return <AuthCtx.Provider value={value}><LabelsProvider>{children}</LabelsProvider></AuthCtx.Provider>;
 }

@@ -502,7 +502,9 @@ export default function Admin() {
       ) : null}
       {tab === 'categories' ? (
         <CollectionEditor col="categories" blank={{ name: 'מרחב חדש', description: '', active: false }} fields={[
-          { key: 'name', label: 'שם' }, { key: 'description', label: 'תיאור', type: 'textarea' }, { key: 'active', label: 'פעיל', type: 'checkbox' }, { key: 'order', label: 'סדר', type: 'number' },
+          { key: 'emoji', label: 'סמל (אימוג\'י)' }, { key: 'name', label: 'שם' }, { key: 'description', label: 'הקשר (לפני השאלה)', type: 'textarea' },
+          { key: 'question', label: 'שאלת הפתיחה – השער למרחב', type: 'textarea' }, { key: 'subtopics', label: 'שבילים אפשריים (מופרדים ב-·)', type: 'textarea' },
+          { key: 'active', label: 'פעיל', type: 'checkbox' }, { key: 'order', label: 'סדר', type: 'number' },
         ]} />
       ) : null}
       {tab === 'cards' ? (

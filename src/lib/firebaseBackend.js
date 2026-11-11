@@ -38,7 +38,7 @@ export function createFirebaseBackend(config) {
     onAuth(cb) {
       return onAuthStateChanged(auth, (u) => cb(u ? {
         uid: u.uid,
-        displayName: u.displayName || (u.email ? u.email.split('@')[0] : ''),
+        displayName: u.displayName || '',
       } : null));
     },
     signInGoogle() { return signInWithPopup(auth, new GoogleAuthProvider()); },

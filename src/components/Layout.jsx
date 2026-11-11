@@ -4,7 +4,7 @@ import { backend, isDemo } from '../lib/backend.js';
 import { useAuth, useCollection, useNavGroups, useSettings, useSpaces, useT } from '../lib/store.jsx';
 import { harvestWindow } from '../lib/seasons.js';
 import { SITE } from '../content/defaults.js';
-import SignIn from './SignIn.jsx';
+import SignIn, { NameChooser } from './SignIn.jsx';
 import IdeaButton, { openIdea } from './IdeaButton.jsx';
 
 // מונה פניות חדשות – נטען רק אצל מארחים (רק להם מותר לקרוא פניות)
@@ -131,7 +131,7 @@ function useScrollOnNavigate() {
 }
 
 export default function Layout() {
-  const { user, name, isAdmin, isHost, openSignIn } = useAuth();
+  const { user, name, isAdmin, isHost, openSignIn, openName } = useAuth();
   const { pathname } = useLocation();
   const t = useT();
   useScrollOnNavigate();
@@ -152,7 +152,7 @@ export default function Layout() {
           {isHost ? <Link to="/admin" className="link-btn">{isAdmin ? 'ניהול' : 'אירוח'}<NewFeedbackCount /></Link> : null}
           {user ? (
             <>
-              <span className="hello">שלום, {name}</span>
+              <button type="button" className="hello link-btn quiet" onClick={openName} title="לשנות את השם שלך במרחב">שלום, {name || 'משתתפ.ת'} ✎</button>
               <button type="button" className="link-btn quiet" onClick={() => backend.signOut()}>יציאה</button>
             </>
           ) : (
@@ -175,6 +175,7 @@ export default function Layout() {
       <IdeaButton />
       <MusicPlayer />
       <SignIn />
+      <NameChooser />
     </div>
   );
 }

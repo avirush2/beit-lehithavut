@@ -43,10 +43,17 @@ export async function upgradeWording({ stamp, isOwner } = {}) {
     }
   }
   for (const cat of DEFAULT_CATEGORIES) {
-    const prev = PREVIOUS_CATEGORIES[cat.id];
-    if (!prev) continue;
     const doc = await backend.get('categories', cat.id);
-    if (!doc) continue;
+    // נוסח מרחבי החיים לפי גרסה: מרחב שהגרסה שלו ישנה יותר מתעדכן כולו (פעם אחת), ומרחב חסר נוצר
+    if (cat.wording && (doc?.wording || 1) < cat.wording) {
+      const { id, ...fields } = cat;
+      if (doc) await backend.update('categories', id, fields);
+      else await backend.set('categories', id, fields);
+      written.push(`מרחב: ${cat.name}`);
+      continue;
+    }
+    const prev = PREVIOUS_CATEGORIES[cat.id];
+    if (!prev || !doc) continue;
     const patch = {};
     for (const [field, oldValue] of Object.entries(prev)) {
       if (doc[field] === oldValue) patch[field] = cat[field];

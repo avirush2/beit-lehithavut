@@ -143,7 +143,7 @@ export function LifeSpacePicker({ value = [], onChange, label = 'לאיזה מר
   const spaces = useLifeSpaces();
   const [open, setOpen] = useState(!collapsible || value.length > 0);
   if (!spaces.length) return null;
-  if (!open) return <button type="button" className="link-btn quiet" onClick={() => setOpen(true)}>+ לאיזה מרחב חיים זה קשור?</button>;
+  if (!open) return <button type="button" className="link-btn quiet" onClick={() => setOpen(true)}>+ {label.replace(' (לא חובה)', '')}</button>;
   const names = spaces.filter((s) => value.includes(s.id)).map((s) => s.name);
   return (
     <div className="field">
