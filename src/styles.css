@@ -282,6 +282,9 @@ a.card:hover { border-color: var(--moss); transform: translateY(-2px); }
 .door strong { font-size: 1.12rem; color: var(--tone-ink); }
 .door-text { font-size: .95rem; line-height: 1.45; }
 .door-hint { margin-top: auto; padding-top: .3rem; font-size: .8rem; color: var(--muted); }
+.doors-how { margin: 1.4rem auto 0; max-width: 34em; color: var(--muted); }
+.doors-how ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .3rem; }
+.doors-how li::before { content: "🌱 "; }
 .doors-after { margin-top: 1.2rem; }
 .doors-after p { font-size: 1.12rem; margin: 0; }
 @media (max-width: 640px) {

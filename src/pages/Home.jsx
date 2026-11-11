@@ -24,10 +24,11 @@ function Doors() {
             <Motif kind={d.motif} size={44} />
             <strong>{t(`door-${d.key}-title`)}</strong>
             <span className="door-text">{t(`door-${d.key}-text`)}</span>
-            <span className="door-hint">{t(`door-${d.key}-hint`)} ←</span>
+            {t(`door-${d.key}-hint`) ? <span className="door-hint">{t(`door-${d.key}-hint`)}</span> : null}
           </Link>
         ))}
       </div>
+      <Prose text={t('doors-how')} className="doors-how" />
       <Prose text={t('doors-after')} className="doors-after" />
     </section>
   );

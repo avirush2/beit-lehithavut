@@ -90,7 +90,7 @@ export default function Tickle() {
           <div key={flipKey} className={`play-card flip deck-${deck}`}>
             <p>{card.text}</p>
           </div>
-          <textarea rows={5} value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="מה עולה? בלי לחשוב יותר מדי." />
+          <textarea rows={5} value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="מה עולה?" />
           <div className="row-between wrap">
             <button type="button" className="link-btn" onClick={() => draw(deck)}>קלף אחר</button>
             <div className="row-start">

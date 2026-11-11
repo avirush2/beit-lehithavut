@@ -37,7 +37,7 @@ function Voices() {
       <form className="invite tone-peach" onSubmit={submit}>
         <p className="invite-lead">{lead}</p>
         <label className="invite-q" htmlFor="voice-text">{t('voices-question')}</label>
-        <textarea id="voice-text" rows={4} value={text} onChange={(e) => setText(e.target.value)} maxLength={600} />
+        <textarea id="voice-text" rows={6} value={text} onChange={(e) => setText(e.target.value)} maxLength={3000} />
         <p className="invite-after">{after}</p>
         <LifeSpacePicker key={sent} value={spaces} onChange={setSpaces} collapsible />
         <div className="row-end"><button className="btn" disabled={busy || !text.trim()}>{t('voices-send')}</button></div>

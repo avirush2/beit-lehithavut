@@ -33,18 +33,20 @@ function StoryForm() {
     <form className="invite tone-sun" onSubmit={save}>
       <p className="invite-lead">{t('celebrate-lead')}</p>
       <label className="invite-q" htmlFor="story-title">{t('celebrate-question')}</label>
-      <input id="story-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} placeholder="במשפט אחד" />
       <Prose text={intro} className="invite-after" />
+      <label className="field"><span className="field-label">כותרת</span>
+        <input id="story-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} />
+      </label>
+      <label className="field"><span className="field-label">ספרו לנו (לא חובה)</span>
+        <textarea rows={6} value={body} onChange={(e) => setBody(e.target.value)} placeholder={PROMPTS.join(' ')} />
+      </label>
       <div className="field"><span className="field-label">איפה זה צומח?</span>
         <div className="chips">
           {KINDS.map((k) => <button key={k.key} type="button" className={`chip ${kind === k.key ? 'on' : ''}`} aria-pressed={kind === k.key} onClick={() => setKind(k.key)}>{k.title}</button>)}
         </div>
       </div>
       <details className="invite-more" key={sent}>
-        <summary>להוסיף עוד (פירוט, קישור)</summary>
-        <label className="field"><span className="field-label">קצת יותר</span>
-          <textarea rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder={PROMPTS.join(' ')} />
-        </label>
+        <summary>להוסיף קישור</summary>
         <label className="field"><span className="field-label">קישור</span><input value={link} onChange={(e) => setLink(e.target.value)} dir="ltr" placeholder="https://" /></label>
       </details>
       <LifeSpacePicker key={`s${sent}`} value={spaces} onChange={setSpaces} collapsible />
