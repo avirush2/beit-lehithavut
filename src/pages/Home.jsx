@@ -63,7 +63,7 @@ function Growing() {
 }
 
 export default function Home() {
-  const welcome = useContent('welcomeShort');
+  const welcome = useContent('welcomeIntro');
   const settings = useSettings();
   const t = useT();
 

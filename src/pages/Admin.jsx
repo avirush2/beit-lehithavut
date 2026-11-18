@@ -10,7 +10,7 @@ import { HappeningForm, useKindOf } from './Happenings.jsx';
 import { FEEDBACK_TYPES, LABEL_GROUPS, DEFAULT_LABELS } from '../content/defaults.js';
 
 const TEXTS = [
-  ['welcomeShort', 'שער הכניסה – טקסט הפתיחה (מעל שלוש הדלתות)'],
+  ['welcomeIntro','שער הכניסה – טקסט הפתיחה (מעל שלוש הדלתות)'],
   ['growingQuestion', 'שער הכניסה – כותרת "מה צומח עכשיו" (מוצג רק אם הופעל בהגדרות)'],
   ['mapDreaming', 'חלימה – פתיח העמוד'],
   ['tickleIntro', 'חלימה ← הנבעת חלום – פתיח קצר'],
